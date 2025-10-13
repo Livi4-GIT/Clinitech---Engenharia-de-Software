@@ -41,6 +41,13 @@ export default class CadastroUsuario extends React.Component {
     return dt.getFullYear() === yyyy && dt.getMonth() === mm - 1 && dt.getDate() === dd;
   };
 
+  formatarDataInput = (v) => {
+    const d = this.somenteDigitos(v).slice(0, 8);
+    if (d.length <= 2) return d;
+    if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+    return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4, 8)}`;
+  };
+
   gravar = async () => {
     try {
       const { nome, cpf, nascimento, genero, celular, cep, senha, confirmarSenha } = this.state;
@@ -167,12 +174,20 @@ export default class CadastroUsuario extends React.Component {
                 onChangeText: (v) => this.setState({ cpf: this.somenteDigitos(v) }),
                 maxLength: 11,
               })}
-              {this.Input({
-                icon: "calendar",
-                placeholder: "Data de nascimento (DD/MM/AAAA)",
-                value: nascimento,
-                onChangeText: (v) => this.setState({ nascimento: v }),
-              })}
+              {/* Data com máscara DD/MM/AAAA */}
+              <View style={styles.inputWrap}>
+                <MaterialCommunityIcons name="calendar" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Data de nascimento (DD/MM/AAAA)"
+                  placeholderTextColor="#b8c7f8"
+                  keyboardType="number-pad"
+                  value={nascimento}
+                  onChangeText={(v) => this.setState({ nascimento: this.formatarDataInput(v) })}
+                  maxLength={10}
+                  autoCapitalize="none"
+                />
+              </View>
 
               {this.GeneroSelect()}
 
@@ -254,22 +269,10 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, height: 40, color: "#eaf1ff" },
 
-
-  genderSection: {
-    marginTop: SP,     
-    marginBottom: SP,     
-  },
-  genderHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,     
-  },
+  genderSection: { marginTop: SP, marginBottom: SP },
+  genderHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   labelGenero: { color: "#eaf1ff", fontSize: 14, fontWeight: "600" },
-  chipsWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
+  chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
     borderWidth: 1,
     borderColor: "rgba(214,228,255,0.6)",
@@ -280,10 +283,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     backgroundColor: "rgba(255,255,255,0.06)",
   },
-  chipActive: {
-    backgroundColor: "#2f6edb",
-    borderColor: "#2f6edb",
-  },
+  chipActive: { backgroundColor: "#2f6edb", borderColor: "#2f6edb" },
   chipText: { color: "#eaf1ff", fontWeight: "600" },
   chipTextActive: { color: "#fff" },
 
