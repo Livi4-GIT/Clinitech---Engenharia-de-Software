@@ -40,12 +40,18 @@ export default class CadastroUsuario extends React.Component {
     const dt = new Date(yyyy, mm - 1, dd);
     return dt.getFullYear() === yyyy && dt.getMonth() === mm - 1 && dt.getDate() === dd;
   };
-
   formatarDataInput = (v) => {
     const d = this.somenteDigitos(v).slice(0, 8);
     if (d.length <= 2) return d;
     if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
     return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4, 8)}`;
+  };
+  formatarCPF = (v) => {
+    const d = this.somenteDigitos(v).slice(0, 11);
+    if (d.length <= 3) return d;
+    if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+    if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+    return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
   };
 
   gravar = async () => {
@@ -166,15 +172,21 @@ export default class CadastroUsuario extends React.Component {
                 value: nome,
                 onChangeText: (v) => this.setState({ nome: v }),
               })}
-              {this.Input({
-                icon: "card-account-details",
-                placeholder: "CPF (somente números)",
-                keyboardType: "number-pad",
-                value: cpf,
-                onChangeText: (v) => this.setState({ cpf: this.somenteDigitos(v) }),
-                maxLength: 11,
-              })}
-              {/* Data com máscara DD/MM/AAAA */}
+
+              <View style={styles.inputWrap}>
+                <MaterialCommunityIcons name="card-account-details" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="CPF (000.000.000-00)"
+                  placeholderTextColor="#b8c7f8"
+                  keyboardType="number-pad"
+                  value={cpf}
+                  onChangeText={(v) => this.setState({ cpf: this.formatarCPF(v) })}
+                  maxLength={14}
+                  autoCapitalize="none"
+                />
+              </View>
+
               <View style={styles.inputWrap}>
                 <MaterialCommunityIcons name="calendar" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
                 <TextInput
