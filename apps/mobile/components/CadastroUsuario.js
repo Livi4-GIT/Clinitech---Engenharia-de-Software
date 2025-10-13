@@ -14,6 +14,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+const GENDER_OPTIONS = ["Feminino", "Masculino", "Outro"];
+
 export default class CadastroUsuario extends React.Component {
   constructor(props) {
     super(props);
@@ -41,39 +43,21 @@ export default class CadastroUsuario extends React.Component {
 
   gravar = async () => {
     try {
-      const { nome, cpf, nascimento, genero, celular, cep, senha, confirmarSenha } =
-        this.state;
-
+      const { nome, cpf, nascimento, genero, celular, cep, senha, confirmarSenha } = this.state;
       const cpfN = this.somenteDigitos(cpf);
       const celN = this.somenteDigitos(celular);
       const cepN = this.somenteDigitos(cep);
 
-      if (
-        !nome.trim() ||
-        !cpfN ||
-        !nascimento.trim() ||
-        !genero.trim() ||
-        !celN ||
-        !cepN ||
-        !senha ||
-        !confirmarSenha
-      ) {
+      if (!nome.trim() || !cpfN || !nascimento.trim() || !genero.trim() || !celN || !cepN || !senha || !confirmarSenha) {
         Alert.alert("Atenção", "Preencha todos os campos.");
         return;
       }
       if (cpfN.length !== 11) return Alert.alert("CPF inválido", "11 dígitos.");
-      if (!this.validarDataBR(nascimento))
-        return Alert.alert("Data inválida", "Use DD/MM/AAAA.");
-      if (celN.length < 10 || celN.length > 11)
-        return Alert.alert("Celular inválido", "Use DDD + número.");
+      if (!this.validarDataBR(nascimento)) return Alert.alert("Data inválida", "Use DD/MM/AAAA.");
+      if (celN.length < 10 || celN.length > 11) return Alert.alert("Celular inválido", "Use DDD + número.");
       if (cepN.length !== 8) return Alert.alert("CEP inválido", "8 dígitos.");
-      if (!this.senhaForte(senha))
-        return Alert.alert(
-          "Senha fraca",
-          "Mín. 8, com 1 maiúscula, 1 minúscula e 1 número."
-        );
-      if (senha !== confirmarSenha)
-        return Alert.alert("Senhas diferentes", "Confirmação não confere.");
+      if (!this.senhaForte(senha)) return Alert.alert("Senha fraca", "Mín. 8, com 1 maiúscula, 1 minúscula e 1 número.");
+      if (senha !== confirmarSenha) return Alert.alert("Senhas diferentes", "Confirmação não confere.");
 
       const existe = await AsyncStorage.getItem(cpfN);
       if (existe) return Alert.alert("CPF já cadastrado", "Tente outro.");
@@ -124,20 +108,47 @@ export default class CadastroUsuario extends React.Component {
     </View>
   );
 
+  GeneroSelect = () => {
+    const { genero } = this.state;
+    return (
+      <View style={styles.genderSection}>
+        <View style={styles.genderHeader}>
+          <MaterialCommunityIcons
+            name="gender-male-female"
+            size={20}
+            color="#d6e4ff"
+            style={{ marginRight: 8, marginTop: 2 }}
+          />
+          <Text style={styles.labelGenero}>Gênero</Text>
+        </View>
+
+        <View style={styles.chipsWrap}>
+          {GENDER_OPTIONS.map((opt) => {
+            const active = genero === opt;
+            return (
+              <Pressable
+                key={opt}
+                onPress={() => this.setState({ genero: opt })}
+                style={[styles.chip, active && styles.chipActive]}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: active }}
+                accessibilityLabel={`Selecionar ${opt}`}
+              >
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>{opt}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  };
+
   render() {
     const { nome, cpf, nascimento, genero, celular, cep, senha, confirmarSenha } = this.state;
 
     return (
-      <LinearGradient
-        colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ flex: 1 }}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={{ flex: 1 }}
-        >
+      <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
             <View style={styles.card}>
               <Text style={styles.title}>Cadastro</Text>
@@ -162,12 +173,9 @@ export default class CadastroUsuario extends React.Component {
                 value: nascimento,
                 onChangeText: (v) => this.setState({ nascimento: v }),
               })}
-              {this.Input({
-                icon: "gender-male-female",
-                placeholder: "Gênero",
-                value: genero,
-                onChangeText: (v) => this.setState({ genero: v }),
-              })}
+
+              {this.GeneroSelect()}
+
               {this.Input({
                 icon: "phone",
                 placeholder: "Celular (DDD + número)",
@@ -199,21 +207,13 @@ export default class CadastroUsuario extends React.Component {
                 onChangeText: (v) => this.setState({ confirmarSenha: v }),
               })}
 
-              {/* Botão gradiente usando Pressable + Text */}
-              <LinearGradient
-                colors={["#2f6edb", "#1f4fb6"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.btn}
-              >
+              <LinearGradient colors={["#2f6edb", "#1f4fb6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.btn}>
                 <Pressable onPress={this.gravar} style={styles.btnPress}>
                   <Text style={styles.btnText}>Cadastrar</Text>
                 </Pressable>
               </LinearGradient>
 
-              <Text style={styles.note}>
-                Seus dados ficam apenas neste dispositivo (demo).
-              </Text>
+              <Text style={styles.note}>Seus dados ficam apenas neste dispositivo (demo).</Text>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -221,6 +221,8 @@ export default class CadastroUsuario extends React.Component {
     );
   }
 }
+
+const SP = 16;
 
 const styles = StyleSheet.create({
   center: { flexGrow: 1, justifyContent: "center", padding: 20 },
@@ -234,7 +236,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 10 },
-    // backdropFilter: "blur(8px)", // ❌ não existe no RN
   },
   title: {
     color: "#eaf1ff",
@@ -251,29 +252,43 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(214,228,255,0.4)",
     paddingBottom: 4,
   },
-  input: {
-    flex: 1,
-    height: 40,
-    color: "#eaf1ff",
+  input: { flex: 1, height: 40, color: "#eaf1ff" },
+
+
+  genderSection: {
+    marginTop: SP,     
+    marginBottom: SP,     
   },
-  btn: {
-    marginTop: 16,
-    borderRadius: 14,
-    overflow: "hidden",
-  },
-  btnPress: {
-    paddingVertical: 14,
+  genderHeader: {
+    flexDirection: "row",
     alignItems: "center",
+    marginBottom: 10,     
   },
-  btnText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
+  labelGenero: { color: "#eaf1ff", fontSize: 14, fontWeight: "600" },
+  chipsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
   },
-  note: {
-    textAlign: "center",
-    color: "#cdd9ff",
-    fontSize: 12,
-    marginTop: 10,
+  chip: {
+    borderWidth: 1,
+    borderColor: "rgba(214,228,255,0.6)",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    marginRight: 8,
+    marginBottom: 8,
+    backgroundColor: "rgba(255,255,255,0.06)",
   },
+  chipActive: {
+    backgroundColor: "#2f6edb",
+    borderColor: "#2f6edb",
+  },
+  chipText: { color: "#eaf1ff", fontWeight: "600" },
+  chipTextActive: { color: "#fff" },
+
+  btn: { marginTop: 16, borderRadius: 14, overflow: "hidden" },
+  btnPress: { paddingVertical: 14, alignItems: "center" },
+  btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+  note: { textAlign: "center", color: "#cdd9ff", fontSize: 12, marginTop: 10 },
 });
