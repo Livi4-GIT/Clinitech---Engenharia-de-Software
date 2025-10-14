@@ -36,11 +36,9 @@ export default class LoginUsuario extends React.Component {
 
     const data = await AsyncStorage.getItem(cpfN);
     if (!data) return Alert.alert("Credenciais inválidas", "CPF não cadastrado.");
-
     const user = JSON.parse(data);
     if (user.senha !== senha) return Alert.alert("Credenciais inválidas", "Senha incorreta.");
 
-    // sucesso
     this.props.onLoginSuccess?.(user);
   };
 
@@ -51,6 +49,14 @@ export default class LoginUsuario extends React.Component {
       <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
           <View style={styles.center}>
+            {/* Marca sem círculo */}
+            <View style={styles.brandWrap} accessible accessibilityRole="header" accessibilityLabel="ClinicTech">
+              <Text style={styles.brandName}>
+                <Text style={styles.brandClinic}>Clinic</Text>
+                <Text style={styles.brandTech}>Tech</Text>
+              </Text>
+            </View>
+
             <View style={styles.card}>
               <Text style={styles.title}>Entrar</Text>
 
@@ -98,8 +104,40 @@ export default class LoginUsuario extends React.Component {
   }
 }
 
+
+const ROYAL = "#2f6edb";
+const ACCENT = "#00E5FF"; 
+
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", padding: 20 },
+
+  brandWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 22,
+  },
+  brandName: {
+    transform: [{ translateY: -2 }],
+  },
+  brandClinic: {
+    color: "#ffffff",
+    fontSize: 60,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0,0,0,0.65)",
+    textShadowOffset: { width: 0, height: 13 },
+    textShadowRadius: 10,
+  },
+  brandTech: {
+    color: ACCENT,
+    fontSize: 45,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0,0,0,0.65)",
+    textShadowOffset: { width: 0, height:10 },
+    textShadowRadius: 10,
+  },
+
   card: {
     borderRadius: 28,
     padding: 22,
@@ -108,6 +146,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.18)",
   },
   title: { color: "#eaf1ff", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 16 },
+
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
@@ -117,8 +156,10 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   input: { flex: 1, height: 40, color: "#eaf1ff" },
+
   btn: { marginTop: 12, borderRadius: 14, overflow: "hidden" },
   btnPress: { paddingVertical: 14, alignItems: "center" },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+
   link: { color: "#cdd9ff", textAlign: "center", fontWeight: "600" },
 });
