@@ -40,14 +40,12 @@ export default class CadastroUsuario extends React.Component {
     const dt = new Date(yyyy, mm - 1, dd);
     return dt.getFullYear() === yyyy && dt.getMonth() === mm - 1 && dt.getDate() === dd;
   };
-
   formatarDataInput = (v) => {
     const d = this.somenteDigitos(v).slice(0, 8);
     if (d.length <= 2) return d;
     if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
     return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4, 8)}`;
   };
-
   formatarCPF = (v) => {
     const d = this.somenteDigitos(v).slice(0, 11);
     if (d.length <= 3) return d;
@@ -55,14 +53,13 @@ export default class CadastroUsuario extends React.Component {
     if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
     return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
   };
-
   formatarCelular = (v) => {
-    const d = this.somenteDigitos(v).slice(0, 11); // DDD + 8 ou 9 dígitos
+    const d = this.somenteDigitos(v).slice(0, 11);
     if (d.length === 0) return "";
     if (d.length <= 2) return `(${d}`;
     if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`; // 8 dígitos no número
-    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7, 11)}`; // 9 dígitos no número
+    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7, 11)}`;
   };
 
   gravar = async () => {
@@ -109,8 +106,9 @@ export default class CadastroUsuario extends React.Component {
         senha: "",
         confirmarSenha: "",
       });
+      // volta para o login
+      this.props.onAfterSave?.();
     } catch (e) {
-      console.log(e);
       Alert.alert("Erro", "Não foi possível salvar.");
     }
   };
@@ -137,27 +135,14 @@ export default class CadastroUsuario extends React.Component {
     return (
       <View style={styles.genderSection}>
         <View style={styles.genderHeader}>
-          <MaterialCommunityIcons
-            name="gender-male-female"
-            size={20}
-            color="#d6e4ff"
-            style={{ marginRight: 8, marginTop: 2 }}
-          />
+          <MaterialCommunityIcons name="gender-male-female" size={20} color="#d6e4ff" style={{ marginRight: 8, marginTop: 2 }} />
           <Text style={styles.labelGenero}>Gênero</Text>
         </View>
-
         <View style={styles.chipsWrap}>
           {GENDER_OPTIONS.map((opt) => {
             const active = genero === opt;
             return (
-              <Pressable
-                key={opt}
-                onPress={() => this.setState({ genero: opt })}
-                style={[styles.chip, active && styles.chipActive]}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: active }}
-                accessibilityLabel={`Selecionar ${opt}`}
-              >
+              <Pressable key={opt} onPress={() => this.setState({ genero: opt })} style={[styles.chip, active && styles.chipActive]}>
                 <Text style={[styles.chipText, active && styles.chipTextActive]}>{opt}</Text>
               </Pressable>
             );
@@ -177,12 +162,7 @@ export default class CadastroUsuario extends React.Component {
             <View style={styles.card}>
               <Text style={styles.title}>Cadastro</Text>
 
-              {this.Input({
-                icon: "account",
-                placeholder: "Nome completo",
-                value: nome,
-                onChangeText: (v) => this.setState({ nome: v }),
-              })}
+              {this.Input({ icon: "account", placeholder: "Nome completo", value: nome, onChangeText: (v) => this.setState({ nome: v }) })}
 
               <View style={styles.inputWrap}>
                 <MaterialCommunityIcons name="card-account-details" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
@@ -236,13 +216,7 @@ export default class CadastroUsuario extends React.Component {
                 onChangeText: (v) => this.setState({ cep: this.somenteDigitos(v) }),
                 maxLength: 8,
               })}
-              {this.Input({
-                icon: "lock",
-                placeholder: "Senha forte",
-                secure: true,
-                value: senha,
-                onChangeText: (v) => this.setState({ senha: v }),
-              })}
+              {this.Input({ icon: "lock", placeholder: "Senha forte", secure: true, value: senha, onChangeText: (v) => this.setState({ senha: v }) })}
               {this.Input({
                 icon: "lock-check",
                 placeholder: "Verificar senha",
@@ -256,8 +230,6 @@ export default class CadastroUsuario extends React.Component {
                   <Text style={styles.btnText}>Cadastrar</Text>
                 </Pressable>
               </LinearGradient>
-
-              <Text style={styles.note}>Seus dados ficam apenas neste dispositivo (demo).</Text>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -276,18 +248,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.10)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.18)",
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
   },
-  title: {
-    color: "#eaf1ff",
-    fontSize: 20,
-    fontWeight: "700",
-    textAlign: "center",
-    marginBottom: 14,
-  },
+  title: { color: "#eaf1ff", fontSize: 20, fontWeight: "700", textAlign: "center", marginBottom: 14 },
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
@@ -297,7 +259,6 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   input: { flex: 1, height: 40, color: "#eaf1ff" },
-
   genderSection: { marginTop: SP, marginBottom: SP },
   genderHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   labelGenero: { color: "#eaf1ff", fontSize: 14, fontWeight: "600" },
@@ -315,9 +276,7 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: "#2f6edb", borderColor: "#2f6edb" },
   chipText: { color: "#eaf1ff", fontWeight: "600" },
   chipTextActive: { color: "#fff" },
-
   btn: { marginTop: 16, borderRadius: 14, overflow: "hidden" },
   btnPress: { paddingVertical: 14, alignItems: "center" },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
-  note: { textAlign: "center", color: "#cdd9ff", fontSize: 12, marginTop: 10 },
 });
