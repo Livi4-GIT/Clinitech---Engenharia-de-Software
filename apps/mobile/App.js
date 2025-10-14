@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
 import LoginUsuario from "./components/LoginUsuario";
 import CadastroUsuario from "./components/CadastroUsuario";
+import LoginMedico from "./components/LoginMedico"; 
 
 export default function App() {
   const [screen, setScreen] = useState("login"); 
@@ -22,6 +23,7 @@ export default function App() {
       {screen === "login" && (
         <LoginUsuario
           onGoCadastro={() => setScreen("cadastro")}
+          onGoLoginMedico={() => setScreen("loginMedico")} 
           onLoginSuccess={handleLoginSuccess}
         />
       )}
@@ -35,6 +37,10 @@ export default function App() {
             </Pressable>
           </View>
         </>
+      )}
+
+      {screen === "loginMedico" && ( 
+        <LoginMedico onBack={() => setScreen("login")} />
       )}
 
       <StatusBar style="light" />
