@@ -7,14 +7,18 @@ import LoginMedico from "./components/LoginMedico";
 import ConfirmacaoCadastroMedico from "./components/ConfirmacaoCadastroMedico";
 import CadastroMedico from "./components/CadastroMedico";
 
+
+import HomeScreen from "./components/HomeUsuario";
+
 export default function App() {
-  const [screen, setScreen] = useState("login"); 
+  const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
 
   const handleLoginSuccess = (u) => {
     setUser(u);
+    setScreen("homeUsuario");            
     console.log("LOGIN OK. Usuário:", u);
-    Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.\n(TODO: ir para Home)`);
+    Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
   };
 
   return (
@@ -44,7 +48,8 @@ export default function App() {
           onGoCadastroMedico={() => setScreen("confirmacaoCadastroMedico")}
           onLoginSuccess={(med) => {
             console.log("Login médico OK", med);
-            Alert.alert("Bem-vindo!", "Login médico realizado.\n(TODO: ir para Home Médico)");
+            Alert.alert("Bem-vindo!", "Login médico realizado.");
+            // setScreen("homeMedico") quando tiver a home do médico
           }}
         />
       )}
@@ -61,6 +66,10 @@ export default function App() {
           onAfterSave={() => setScreen("loginMedico")}
           onCancelar={() => setScreen("loginMedico")}
         />
+      )}
+
+      {screen === "homeUsuario" && (
+        <HomeScreen user={user} onLogout={() => setScreen("login")} />
       )}
 
       <StatusBar style="light" />
