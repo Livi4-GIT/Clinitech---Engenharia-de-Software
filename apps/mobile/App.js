@@ -6,7 +6,7 @@ import CadastroUsuario from "./components/CadastroUsuario";
 export default function App() {
   return (
     <View style={styles.container}>
-      <CadastroUsuario />
+
       <StatusBar style="light" />
     </View>
   );
