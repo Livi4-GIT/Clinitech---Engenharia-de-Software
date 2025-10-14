@@ -72,7 +72,7 @@ export default class LoginMedico extends React.Component {
         >
           <View style={{ flex: 1 }}>
             <View style={styles.center}>
-              {/* Marca */}
+         
               <View
                 style={styles.brandWrap}
                 accessible

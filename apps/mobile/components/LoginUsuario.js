@@ -100,7 +100,7 @@ export default class LoginUsuario extends React.Component {
               </View>
             </View>
 
-            {/* Botão circular de jaleco (login médico) */}
+         
             <Pressable
               onPress={() => this.props.onGoLoginMedico?.()}
               style={styles.fabMedico}

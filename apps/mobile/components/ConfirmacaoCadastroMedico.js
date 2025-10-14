@@ -23,7 +23,7 @@ export default class ConfirmacaoCadastroMedico extends React.Component {
     const { token } = this.state;
     if (token === CADASTRO_TOKEN) {
       Alert.alert("Acesso liberado", "Senha de cadastro válida.");
-      this.props.onConfirmado?.(); // você decide a próxima tela no App.js
+      this.props.onConfirmado?.(); 
     } else {
       Alert.alert("Senha inválida", "Verifique a senha de cadastro.");
     }
