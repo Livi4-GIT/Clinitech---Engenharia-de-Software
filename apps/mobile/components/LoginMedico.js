@@ -47,7 +47,6 @@ export default class LoginMedico extends React.Component {
         return Alert.alert("Credenciais inválidas", "Senha incorreta.");
       }
 
-      // sucesso -> devolve o objeto para o App
       this.props.onLoginSuccess?.(medico);
     } catch (e) {
       Alert.alert("Erro", "Não foi possível verificar o login agora.");
@@ -147,7 +146,7 @@ export default class LoginMedico extends React.Component {
                   </Pressable>
                 </LinearGradient>
 
-                {/* link abaixo do Entrar */}
+           
                 <Pressable
                   style={{ marginTop: 12 }}
                   onPress={() => this.props.onGoCadastroMedico?.()}
@@ -157,7 +156,7 @@ export default class LoginMedico extends React.Component {
               </View>
             </View>
 
-            {/* Botão circular inferior: voltar para LoginUsuario */}
+       
             <Pressable
               onPress={() => this.props.onGoLoginUsuario?.()}
               style={styles.fabMedico}
@@ -173,7 +172,7 @@ export default class LoginMedico extends React.Component {
   }
 }
 
-/* estilos iguais ao LoginUsuario */
+
 const ROYAL = "#2f6edb";
 const ACCENT = "#00E5FF";
 const STRONG = "#0D47A1";
