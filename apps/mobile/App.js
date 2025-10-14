@@ -23,7 +23,7 @@ export default function App() {
       {screen === "login" && (
         <LoginUsuario
           onGoCadastro={() => setScreen("cadastro")}
-          onGoLoginMedico={() => setScreen("loginMedico")} 
+          onGoLoginMedico={() => setScreen("loginMedico")}
           onLoginSuccess={handleLoginSuccess}
         />
       )}
@@ -39,8 +39,11 @@ export default function App() {
         </>
       )}
 
-      {screen === "loginMedico" && ( 
-        <LoginMedico onBack={() => setScreen("login")} />
+      {screen === "loginMedico" && (
+        <LoginMedico
+          onBack={() => setScreen("login")}
+          onGoLoginUsuario={() => setScreen("login")}  
+        />
       )}
 
       <StatusBar style="light" />
