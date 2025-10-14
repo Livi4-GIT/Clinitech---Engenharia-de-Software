@@ -3,7 +3,9 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
 import LoginUsuario from "./components/LoginUsuario";
 import CadastroUsuario from "./components/CadastroUsuario";
-import LoginMedico from "./components/LoginMedico"; 
+import LoginMedico from "./components/LoginMedico";
+import ConfirmacaoCadastroMedico from "./components/ConfirmacaoCadastroMedico";
+import CadastroMedico from "./components/CadastroMedico";
 
 export default function App() {
   const [screen, setScreen] = useState("login"); 
@@ -11,9 +13,6 @@ export default function App() {
 
   const handleLoginSuccess = (u) => {
     setUser(u);
-    // Masashi!! Quando você criar sua página Home/Navegação, navegue para lá aqui
-    // Exemplo 
-    // navigation.replace("Home", { user: u });
     console.log("LOGIN OK. Usuário:", u);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.\n(TODO: ir para Home)`);
   };
@@ -41,8 +40,26 @@ export default function App() {
 
       {screen === "loginMedico" && (
         <LoginMedico
-          onBack={() => setScreen("login")}
-          onGoLoginUsuario={() => setScreen("login")}  
+          onGoLoginUsuario={() => setScreen("login")}
+          onGoCadastroMedico={() => setScreen("confirmacaoCadastroMedico")}
+          onLoginSuccess={(med) => {
+            console.log("Login médico OK", med);
+            Alert.alert("Bem-vindo!", "Login médico realizado.\n(TODO: ir para Home Médico)");
+          }}
+        />
+      )}
+
+      {screen === "confirmacaoCadastroMedico" && (
+        <ConfirmacaoCadastroMedico
+          onVoltar={() => setScreen("loginMedico")}
+          onConfirmado={() => setScreen("cadastroMedico")}
+        />
+      )}
+
+      {screen === "cadastroMedico" && (
+        <CadastroMedico
+          onAfterSave={() => setScreen("loginMedico")}
+          onCancelar={() => setScreen("loginMedico")}
         />
       )}
 
