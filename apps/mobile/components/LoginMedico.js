@@ -1,4 +1,3 @@
-// components/LoginMedico.js
 import React from "react";
 import {
   View,
@@ -90,7 +89,7 @@ export default class LoginMedico extends React.Component {
                   </Pressable>
                 </LinearGradient>
 
-                {/* novo: link abaixo do Entrar */}
+   
                 <Pressable
                   style={{ marginTop: 12 }}
                   onPress={() => this.props.onGoCadastroMedico?.()}
@@ -100,7 +99,7 @@ export default class LoginMedico extends React.Component {
               </View>
             </View>
 
-            {/* Botão circular inferior: voltar para LoginUsuario */}
+     
             <Pressable
               onPress={() => this.props.onGoLoginUsuario?.()}
               style={styles.fabMedico}
@@ -116,7 +115,7 @@ export default class LoginMedico extends React.Component {
   }
 }
 
-/* estilos iguais ao LoginUsuario */
+
 const ROYAL = "#2f6edb";
 const ACCENT = "#00E5FF";
 const STRONG = "#0D47A1";
