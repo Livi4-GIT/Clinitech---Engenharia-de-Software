@@ -7,137 +7,118 @@ import {
   StatusBar,
   StyleSheet,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-
-const PURPLE = '#3E1B83';
 
 export default function HomeScreen() {
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={PURPLE} barStyle="light-content" />
+    <LinearGradient
+      colors={['#0a1a3f', '#0f2f6d', '#1c4fb8']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={styles.container}>
+        <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
 
-      {/* Cabeçalho roxo */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Olá Dr. Ciclano!</Text>
-        <View style={styles.profileCircle}>
-          <Ionicons name="person" size={26} color="#6b6b6b" />
-        </View>
-      </View>
-
-      {/* Grade 2x2 */}
-      <View style={styles.grid}>
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.iconBox}>
-            <View style={styles.iconInner}>
-              <Ionicons name="calendar-outline" size={40} color="#1f2742" />
-            </View>
-            <Text style={styles.label}>Agendamentos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconBox}>
-            <View style={styles.iconInner}>
-              <Ionicons name="search-outline" size={40} color="#1f2742" />
-            </View>
-            <Text style={styles.label}>Buscar Paciente</Text>
-          </TouchableOpacity>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Olá Dr. Ciclano!</Text>
+          <View style={styles.profileCircle}>
+            <Ionicons name="person-outline" size={32} color="#3E1B83" />
+          </View>
         </View>
 
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.iconBox}>
-            <View style={styles.iconInner}>
-              <Ionicons name="chatbubble-ellipses-outline" size={40} color="#1f2742" />
-            </View>
-            <Text style={styles.label}>Comunicação</Text>
-          </TouchableOpacity>
+        <View style={styles.grid}>
+          <View style={styles.row}>
+            <TouchableOpacity style={styles.iconBox}>
+              <Ionicons name="calendar-outline" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Agendamentos</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconBox}>
-            <View style={styles.iconInner}>
-              <MaterialCommunityIcons name="microscope" size={40} color="#1f2742" />
-            </View>
-            <Text style={styles.label}>Exames</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.iconBox}>
+              <Ionicons name="search-outline" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Buscar Paciente</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.row}>
+            <TouchableOpacity style={styles.iconBox}>
+              <Ionicons name="chatbubble-outline" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Comunicação</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.iconBox}>
+              <MaterialCommunityIcons name="microscope" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Exames</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
-const CARD_BORDER = 'rgba(0,0,0,0.65)';
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff', 
-  },
+  container: { flex: 1 },
 
   header: {
-    backgroundColor: PURPLE,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 18,
   },
 
   headerText: {
-    color: '#fff',
-    fontSize: 18,
+    color: '#eaf1ff',
+    fontSize: 20,
     fontWeight: '700',
   },
 
   profileCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#cfcfcf',
-    backgroundColor: '#efefef',
+    borderColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
   },
 
   grid: {
-    marginTop: 22,
+    marginTop: 24,
     alignItems: 'center',
+    paddingHorizontal: 16,
   },
 
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '86%',
-    marginBottom: 26,
+    width: '100%',
+    marginBottom: 16,
   },
 
   iconBox: {
-    width: '46%',
-    alignItems: 'center',
-  },
-
-  iconInner: {
-    width: 120,
-    height: 120,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    borderWidth: 1.5,
-    borderColor: CARD_BORDER,
+    width: '48%',
+    height: 130,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: 'rgba(255,255,255,0.10)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 12,
     shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
   },
 
   label: {
     marginTop: 10,
-    fontSize: 15,
-    color: PURPLE,
+    fontSize: 14,
+    color: '#eaf1ff',
     textAlign: 'center',
     fontWeight: '600',
   },

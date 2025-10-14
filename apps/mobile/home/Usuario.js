@@ -96,12 +96,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    gap: 16,
     marginBottom: 16,
   },
 
   iconBox: {
-    flex: 1,
+    width: '48%',
     height: 130,
     borderRadius: 20,
     borderWidth: 1,
