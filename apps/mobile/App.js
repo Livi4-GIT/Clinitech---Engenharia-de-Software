@@ -7,16 +7,17 @@ import LoginMedico from "./components/LoginMedico";
 import ConfirmacaoCadastroMedico from "./components/ConfirmacaoCadastroMedico";
 import CadastroMedico from "./components/CadastroMedico";
 
-
-import HomeScreen from "./components/HomeUsuario";
+import HomeUsuario from "./components/HomeUsuario";
+import HomeDoutor from "./components/HomeDoutor"; // ✅ este é o home do médico que você criou
 
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
+  const [medico, setMedico] = useState(null);
 
-  const handleLoginSuccess = (u) => {
+  const handleLoginSuccessUsuario = (u) => {
     setUser(u);
-    setScreen("homeUsuario");            
+    setScreen("homeUsuario");
     console.log("LOGIN OK. Usuário:", u);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
   };
@@ -27,7 +28,7 @@ export default function App() {
         <LoginUsuario
           onGoCadastro={() => setScreen("cadastro")}
           onGoLoginMedico={() => setScreen("loginMedico")}
-          onLoginSuccess={handleLoginSuccess}
+          onLoginSuccess={handleLoginSuccessUsuario}
         />
       )}
 
@@ -47,9 +48,10 @@ export default function App() {
           onGoLoginUsuario={() => setScreen("login")}
           onGoCadastroMedico={() => setScreen("confirmacaoCadastroMedico")}
           onLoginSuccess={(med) => {
+            setMedico(med);
+            setScreen("homeDoutor"); // ✅ bate com o nome da tela abaixo
             console.log("Login médico OK", med);
             Alert.alert("Bem-vindo!", "Login médico realizado.");
-            // setScreen("homeMedico") quando tiver a home do médico
           }}
         />
       )}
@@ -69,7 +71,11 @@ export default function App() {
       )}
 
       {screen === "homeUsuario" && (
-        <HomeScreen user={user} onLogout={() => setScreen("login")} />
+        <HomeUsuario user={user} onLogout={() => setScreen("login")} />
+      )}
+
+      {screen === "homeDoutor" && ( // ✅ condição certa
+        <HomeDoutor medico={medico} onLogout={() => setScreen("loginMedico")} />
       )}
 
       <StatusBar style="light" />
@@ -80,6 +86,11 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   overlayTop: { position: "absolute", top: 50, right: 20 },
-  backBtn: { backgroundColor: "rgba(47,110,219,0.9)", paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12 },
+  backBtn: {
+    backgroundColor: "rgba(47,110,219,0.9)",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
   backTxt: { color: "#fff", fontWeight: "700" },
 });
