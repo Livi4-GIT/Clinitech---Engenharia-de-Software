@@ -59,14 +59,12 @@ export default class BuscarExamesCPF extends React.Component {
     try {
       const { cpf } = this.state;
       const cpfN = this.somenteDigitos(cpf);
-
-      if (!cpfN || cpfN.length !== 11) {
-        return Alert.alert("CPF inválido", "Informe 11 dígitos.");
-      }
+      if (!cpfN || cpfN.length !== 11) return Alert.alert("CPF inválido", "Informe 11 dígitos.");
 
       this.setState({ carregando: true });
 
-      
+      // Paciente salvo pelo CadastroUsuario: chave = cpfN
+      // Exames: chave = `EXA_${cpfN}`
       const [pacienteStr, examesStr] = await Promise.all([
         AsyncStorage.getItem(cpfN),
         AsyncStorage.getItem(`EXA_${cpfN}`),
@@ -185,24 +183,42 @@ export default class BuscarExamesCPF extends React.Component {
     );
   }
 
+  // ===== CTA rodapé =====
+  handleSolicitarExame = () => {
+    const { paciente, cpf } = this.state;
+    const cpfN = this.somenteDigitos(cpf);
+    if (!paciente) return;
+    if (this.props.onSolicitarExame) {
+      this.props.onSolicitarExame({ cpf: cpfN, paciente });
+    } else {
+      Alert.alert("Ação", `Navegar para tela de solicitação de exame (CPF ${cpfN}).`);
+    }
+  };
+
   render() {
-    const { cpf, carregando } = this.state;
+    const { cpf, carregando, paciente } = this.state;
 
     return (
       <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-          <View style={styles.topRight}>
-            <Pressable
-              onPress={this.props.onVoltar || (() => {})}
-              style={styles.topRightBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Voltar"
-            >
-              <Text style={styles.topRightTxt}>Voltar</Text>
-            </Pressable>
-          </View>
+          {/* Voltar (opcional) */}
+          {this.props.onVoltar && (
+            <View style={styles.topRight}>
+              <Pressable
+                onPress={this.props.onVoltar}
+                style={styles.topRightBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Voltar"
+              >
+                <Text style={styles.topRightTxt}>Voltar</Text>
+              </Pressable>
+            </View>
+          )}
 
-          <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={[styles.center, { paddingBottom: 120 }]} // espaço pro botão fixo
+            keyboardShouldPersistTaps="handled"
+          >
             <View style={styles.card}>
               <Text style={styles.title}>Buscar Exames por CPF</Text>
 
@@ -229,6 +245,26 @@ export default class BuscarExamesCPF extends React.Component {
               {this.renderExames()}
             </View>
           </ScrollView>
+
+          {/* BOTÃO FIXO NO RODAPÉ */}
+          <View style={styles.bottomBar}>
+            <LinearGradient
+              colors={["#2f6edb", "#1f4fb6"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.bottomBtn, !paciente && styles.bottomBtnDisabled]}
+            >
+              <Pressable
+                onPress={this.handleSolicitarExame}
+                disabled={!paciente}
+                style={styles.bottomPress}
+                accessibilityRole="button"
+                accessibilityLabel="Solicitar exame para esse CPF"
+              >
+                <Text style={styles.bottomTxt}>Solicitar exame para esse CPF</Text>
+              </Pressable>
+            </LinearGradient>
+          </View>
         </KeyboardAvoidingView>
       </LinearGradient>
     );
@@ -309,28 +345,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   chipTxt: { color: "#eaf1ff", fontWeight: "700", fontSize: 12 },
-});
 
-/*
-  === SEED OPCIONAL (para testar) ===
-  (async () => {
-    const cpfN = "12345678901";
-    await AsyncStorage.setItem(
-      cpfN,
-      JSON.stringify({
-        nome: "Maria da Silva",
-        nascimento: "12/03/1989",
-        genero: "Feminino",
-        celular: "11999999999",
-        cep: "01234000",
-      })
-    );
-    await AsyncStorage.setItem(
-      `EXA_${cpfN}`,
-      JSON.stringify([
-        { id: "1", tipo: "Hemograma", dataColeta: "10/09/2025", status: "Liberado", resultado: "Dentro da normalidade" },
-        { id: "2", tipo: "Raio-X Tórax", dataColeta: "05/09/2025", status: "Pendente" },
-      ])
-    );
-  })();
-*/
+  // Rodapé fixo
+  bottomBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    paddingBottom: 24, // dá um respiro acima da borda / safe area
+  },
+  bottomBtn: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  bottomBtnDisabled: { opacity: 0.5 },
+  bottomPress: { paddingVertical: 16, alignItems: "center" },
+  bottomTxt: { color: "#fff", fontWeight: "800", fontSize: 16 },
+});
