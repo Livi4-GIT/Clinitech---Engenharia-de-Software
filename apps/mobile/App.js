@@ -1,3 +1,4 @@
+// App.js
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
@@ -11,13 +12,13 @@ import CadastroMedico from "./components/CadastroMedico";
 import HomeUsuario from "./components/HomeUsuario";
 import HomeDoutor from "./components/HomeDoutor";
 import BuscarExamesCPF from "./components/BuscarExamesCPF";
-import SolicitarExame from "./components/SolicitarExame"; 
+import SolicitarExame from "./components/SolicitarExame";
+import CadastrarConvenio from "./components/CadastrarConvenio";
 
 export default function App() {
-  const [screen, setScreen] = useState("login");
+  const [screen, setScreen] = useState("cadastrarConvenio");
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
-
 
   const [examCpf, setExamCpf] = useState(null);
   const [examPaciente, setExamPaciente] = useState(null);
@@ -26,7 +27,6 @@ export default function App() {
     setUser(u);
     setMedico(null);
     setScreen("homeUsuario");
-    console.log("LOGIN OK. Usuário:", u);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
   };
 
@@ -59,7 +59,6 @@ export default function App() {
             setMedico(med);
             setUser(null);
             setScreen("homeDoutor");
-            console.log("Login médico OK", med);
             Alert.alert("Bem-vindo!", "Login médico realizado.");
           }}
         />
@@ -87,6 +86,7 @@ export default function App() {
             setScreen("login");
           }}
           onGoBuscarExames={() => setScreen("buscarExames")}
+          onGoCadastrarConvenio={() => setScreen("cadastrarConvenio")}
         />
       )}
 
@@ -118,9 +118,15 @@ export default function App() {
           paciente={examPaciente}
           onVoltar={() => setScreen("buscarExames")}
           onSaved={() => {
-            
             setScreen("buscarExames");
           }}
+        />
+      )}
+
+      {screen === "cadastrarConvenio" && (
+        <CadastrarConvenio
+          onVoltar={() => setScreen("homeUsuario")}
+          onSaved={() => setScreen("homeUsuario")}
         />
       )}
 
