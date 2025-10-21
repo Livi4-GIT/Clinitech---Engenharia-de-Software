@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import LoginUsuario from "./components/LoginUsuario";
 import CadastroUsuario from "./components/CadastroUsuario";
@@ -11,121 +13,127 @@ import CadastroMedico from "./components/CadastroMedico";
 import HomeUsuario from "./components/HomeUsuario";
 import HomeDoutor from "./components/HomeDoutor";
 import BuscarExamesCPF from "./components/BuscarExamesCPF";
-import SolicitarExame from "./components/SolicitarExame"; 
+import SolicitarExame from "./components/SolicitarExame";
+import InserirConsulta from './components/InserirConsulta';
 
+const Stack = createNativeStackNavigator();
 export default function App() {
-  const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
-
-
   const [examCpf, setExamCpf] = useState(null);
   const [examPaciente, setExamPaciente] = useState(null);
 
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
     setMedico(null);
-    setScreen("homeUsuario");
-    console.log("LOGIN OK. Usuário:", u);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
   };
 
+  const handleLoginSuccessMedico = (m) => {
+    setMedico(m);
+    setUser(null);
+    Alert.alert("Bem-vindo!", "Login médico realizado.");
+  };
+
   return (
-    <View style={styles.container}>
-      {screen === "login" && (
-        <LoginUsuario
-          onGoCadastro={() => setScreen("cadastro")}
-          onGoLoginMedico={() => setScreen("loginMedico")}
-          onLoginSuccess={handleLoginSuccessUsuario}
-        />
-      )}
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {/* Login e Cadastro */}
+        {!user && !medico && (
+          <>
+            <Stack.Screen name="LoginUsuario">
+              {(props) => (
+                <LoginUsuario
+                  {...props}
+                  onGoCadastro={() => props.navigation.navigate("CadastroUsuario")}
+                  onGoLoginMedico={() => props.navigation.navigate("LoginMedico")}
+                  onLoginSuccess={handleLoginSuccessUsuario}
+                />
+              )}
+            </Stack.Screen>
 
-      {screen === "cadastro" && (
-        <>
-          <CadastroUsuario onAfterSave={() => setScreen("login")} />
-          <View style={styles.overlayTop}>
-            <Pressable style={styles.backBtn} onPress={() => setScreen("login")}>
-              <Text style={styles.backTxt}>Já tenho conta</Text>
-            </Pressable>
-          </View>
-        </>
-      )}
+            <Stack.Screen name="CadastroUsuario" component={CadastroUsuario} />
+            <Stack.Screen name="LoginMedico">
+              {(props) => (
+                <LoginMedico
+                  {...props}
+                  onGoLoginUsuario={() => props.navigation.navigate("LoginUsuario")}
+                  onGoCadastroMedico={() =>
+                    props.navigation.navigate("ConfirmacaoCadastroMedico")
+                  }
+                  onLoginSuccess={handleLoginSuccessMedico}
+                />
+              )}
+            </Stack.Screen>
 
-      {screen === "loginMedico" && (
-        <LoginMedico
-          onGoLoginUsuario={() => setScreen("login")}
-          onGoCadastroMedico={() => setScreen("confirmacaoCadastroMedico")}
-          onLoginSuccess={(med) => {
-            setMedico(med);
-            setUser(null);
-            setScreen("homeDoutor");
-            console.log("Login médico OK", med);
-            Alert.alert("Bem-vindo!", "Login médico realizado.");
-          }}
-        />
-      )}
+            <Stack.Screen
+              name="ConfirmacaoCadastroMedico"
+              component={ConfirmacaoCadastroMedico}
+            />
+            <Stack.Screen name="CadastroMedico" component={CadastroMedico} />
+          </>
+        )}
 
-      {screen === "confirmacaoCadastroMedico" && (
-        <ConfirmacaoCadastroMedico
-          onVoltar={() => setScreen("loginMedico")}
-          onConfirmado={() => setScreen("cadastroMedico")}
-        />
-      )}
+        {/* Home */}
+        {user && (
+          <Stack.Screen name="HomeUsuario">
+            {(props) => (
+              <HomeUsuario
+                {...props}
+                user={user}
+                onLogout={() => setUser(null)}
+                onGoBuscarExames={() => props.navigation.navigate("BuscarExames")}
+              />
+            )}
+          </Stack.Screen>
+        )}
 
-      {screen === "cadastroMedico" && (
-        <CadastroMedico
-          onAfterSave={() => setScreen("loginMedico")}
-          onCancelar={() => setScreen("loginMedico")}
-        />
-      )}
+        {medico && (
+          <Stack.Screen name="HomeDoutor">
+            {(props) => (
+              <HomeDoutor
+                {...props}
+                medico={medico}
+                onLogout={() => setMedico(null)}
+                onGoBuscarExames={() => props.navigation.navigate("BuscarExames")}
+              />
+            )}
+          </Stack.Screen>
+        )}
 
-      {screen === "homeUsuario" && (
-        <HomeUsuario
-          user={user}
-          onLogout={() => {
-            setUser(null);
-            setScreen("login");
-          }}
-          onGoBuscarExames={() => setScreen("buscarExames")}
-        />
-      )}
+        {/* Funcionalidades */}
+        <Stack.Screen name="BuscarExames">
+          {(props) => (
+            <BuscarExamesCPF
+              {...props}
+              onVoltar={() =>
+                props.navigation.navigate(user ? "HomeUsuario" : "HomeDoutor")
+              }
+              onSolicitarExame={({ cpf, paciente }) => {
+                setExamCpf(cpf);
+                setExamPaciente(paciente);
+                props.navigation.navigate("SolicitarExame");
+              }}
+            />
+          )}
+        </Stack.Screen>
 
-      {screen === "homeDoutor" && (
-        <HomeDoutor
-          medico={medico}
-          onLogout={() => {
-            setMedico(null);
-            setScreen("loginMedico");
-          }}
-          onGoBuscarExames={() => setScreen("buscarExames")}
-        />
-      )}
+        <Stack.Screen name="SolicitarExame">
+          {(props) => (
+            <SolicitarExame
+              {...props}
+              initialCpf={examCpf}
+              paciente={examPaciente}
+              onVoltar={() => props.navigation.navigate("BuscarExames")}
+              onSaved={() => props.navigation.navigate("BuscarExames")}
+            />
+          )}
+        </Stack.Screen>
 
-      {screen === "buscarExames" && (
-        <BuscarExamesCPF
-          onVoltar={() => setScreen(user ? "homeUsuario" : medico ? "homeDoutor" : "login")}
-          onSolicitarExame={({ cpf, paciente }) => {
-            setExamCpf(cpf);
-            setExamPaciente(paciente);
-            setScreen("solicitarExame");
-          }}
-        />
-      )}
-
-      {screen === "solicitarExame" && (
-        <SolicitarExame
-          initialCpf={examCpf}
-          paciente={examPaciente}
-          onVoltar={() => setScreen("buscarExames")}
-          onSaved={() => {
-            
-            setScreen("buscarExames");
-          }}
-        />
-      )}
-
-      <StatusBar style="light" />
-    </View>
+        {/* Nova tela */}
+        <Stack.Screen name="InserirConsulta" component={InserirConsulta} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

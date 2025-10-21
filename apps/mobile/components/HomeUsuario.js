@@ -5,7 +5,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function HomeScreen({ user, onLogout }) {
+export default function HomeScreen({ user, onLogout, navigation }) {
   const nome = user?.nome || 'Fulano';
 
   return (
@@ -27,7 +27,9 @@ export default function HomeScreen({ user, onLogout }) {
 
         <View style={styles.grid}>
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox}>
+            <TouchableOpacity style={styles.iconBox}
+            onPress={() => navigation.navigate('InserirConsulta')}
+            >
               <Ionicons name="calendar-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Agendamentos</Text>
             </TouchableOpacity>
