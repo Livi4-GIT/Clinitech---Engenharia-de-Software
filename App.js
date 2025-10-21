@@ -10,12 +10,17 @@ import CadastroMedico from "./components/CadastroMedico";
 
 import HomeUsuario from "./components/HomeUsuario";
 import HomeDoutor from "./components/HomeDoutor";
-import BuscarExamesCPF from "./components/BuscarExamesCPF"; // ✅ nova tela
+import BuscarExamesCPF from "./components/BuscarExamesCPF";
+import SolicitarExame from "./components/SolicitarExame"; 
 
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
+
+
+  const [examCpf, setExamCpf] = useState(null);
+  const [examPaciente, setExamPaciente] = useState(null);
 
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
@@ -81,7 +86,7 @@ export default function App() {
             setUser(null);
             setScreen("login");
           }}
-          onGoBuscarExames={() => setScreen("buscarExames")} // ✅ atalho para busca
+          onGoBuscarExames={() => setScreen("buscarExames")}
         />
       )}
 
@@ -92,14 +97,30 @@ export default function App() {
             setMedico(null);
             setScreen("loginMedico");
           }}
-          onGoBuscarExames={() => setScreen("buscarExames")} // ✅ atalho para busca
+          onGoBuscarExames={() => setScreen("buscarExames")}
         />
       )}
 
       {screen === "buscarExames" && (
         <BuscarExamesCPF
-          // volta para a home correta dependendo de quem está logado
           onVoltar={() => setScreen(user ? "homeUsuario" : medico ? "homeDoutor" : "login")}
+          onSolicitarExame={({ cpf, paciente }) => {
+            setExamCpf(cpf);
+            setExamPaciente(paciente);
+            setScreen("solicitarExame");
+          }}
+        />
+      )}
+
+      {screen === "solicitarExame" && (
+        <SolicitarExame
+          initialCpf={examCpf}
+          paciente={examPaciente}
+          onVoltar={() => setScreen("buscarExames")}
+          onSaved={() => {
+            
+            setScreen("buscarExames");
+          }}
         />
       )}
 
