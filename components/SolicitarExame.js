@@ -22,8 +22,6 @@ const EXAM_TYPES = [
   "Eletrocardiograma (ECG)","Tomografia","Ressonância Magnética",
 ];
 
-const FOOTER_RESERVED_SPACE = 200;
-
 export default class SolicitarExame extends React.Component {
   constructor(props) {
     super(props);
@@ -53,6 +51,7 @@ export default class SolicitarExame extends React.Component {
     return dt.getFullYear() === yyyy && dt.getMonth() === mm - 1 && dt.getDate() === dd;
   };
 
+
   salvar = async () => {
     try {
       const { tipo, tipoOutro, dataExame, observacao } = this.state;
@@ -70,10 +69,10 @@ export default class SolicitarExame extends React.Component {
       const novo = {
         id: String(Date.now()),
         tipo: tipoFinal,
-        dataColeta: dataExame.trim(),   
-        observacao: obs,              
+        dataColeta: dataExame.trim(),     
+        observacao: obs,                  
         resultado: obs,                 
-        status: "Pendente",              
+        status: "Pendente",               
       };
 
       const key = `EXA_${cpfN}`;
@@ -89,6 +88,7 @@ export default class SolicitarExame extends React.Component {
     }
   };
 
+
   renderTipoExame() {
     const { tipo, tipoOutro } = this.state;
     const isIOS = Platform.OS === "ios";
@@ -97,7 +97,7 @@ export default class SolicitarExame extends React.Component {
       <>
         <Text style={styles.fieldLabel}>Tipo de exame</Text>
 
-    
+     
         {!isIOS && (
           <View style={styles.selectWrap}>
             <MaterialCommunityIcons name="flask-outline" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
@@ -117,7 +117,7 @@ export default class SolicitarExame extends React.Component {
           </View>
         )}
 
-  
+
         {isIOS && (
           <View style={styles.iosPickerWrap}>
             <Picker
@@ -173,14 +173,11 @@ export default class SolicitarExame extends React.Component {
             </View>
           )}
 
-          <ScrollView
-            contentContainerStyle={[styles.center, { paddingBottom: FOOTER_RESERVED_SPACE }]}
-            keyboardShouldPersistTaps="handled"
-          >
+          <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
             <View style={styles.card}>
               <Text style={styles.title}>Solicitar Exame</Text>
 
-             
+            
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Paciente</Text>
                 <View style={styles.infoRow}>
@@ -193,10 +190,10 @@ export default class SolicitarExame extends React.Component {
                 </View>
               </View>
 
-        
+            
               <View style={{ marginTop: 12 }}>{this.renderTipoExame()}</View>
 
-       
+          
               <View style={{ marginTop: 12 }}>
                 <Text style={styles.fieldLabel}>Dia do exame (DD/MM/AAAA)</Text>
                 <View style={styles.inputWrap}>
@@ -213,7 +210,7 @@ export default class SolicitarExame extends React.Component {
                 </View>
               </View>
 
-    
+             
               <View style={{ marginTop: 12 }}>
                 <Text style={styles.fieldLabel}>Observação (opcional)</Text>
                 <View style={[styles.inputWrap, { alignItems: "flex-start" }]}>
@@ -229,21 +226,25 @@ export default class SolicitarExame extends React.Component {
                 </View>
               </View>
             </View>
-          </ScrollView>
 
-          <View style={styles.bottomBar}>
-            <LinearGradient colors={["#2f6edb", "#1f4fb6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.bottomBtn]}>
+            
+            <LinearGradient
+              colors={["#2f6edb", "#1f4fb6"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.btn, { marginTop: 16 }]}
+            >
               <Pressable
                 onPress={this.salvar}
                 disabled={!canSave}
-                style={[styles.bottomPress, !canSave && { opacity: 0.5 }]}
+                style={[styles.btnPress, !canSave && { opacity: 0.5 }]}
                 accessibilityRole="button"
                 accessibilityLabel="Salvar solicitação"
               >
-                <Text style={styles.bottomTxt}>Salvar solicitação</Text>
+                <Text style={styles.btnText}>Salvar solicitação</Text>
               </Pressable>
             </LinearGradient>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </LinearGradient>
     );
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
   },
   topRightTxt: { color: "#fff", fontWeight: "800", marginLeft: 8 },
   card: {
-    borderRadius: 28, padding: 22, marginBottom: 24,
+    borderRadius: 28, padding: 22, marginBottom: 16, marginTop: 70,
     backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
   },
   title: { color: "#eaf1ff", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 16 },
@@ -267,12 +268,15 @@ const styles = StyleSheet.create({
   sectionTitle: { color: "#eaf1ff", fontSize: 18, fontWeight: "700", marginBottom: 8 },
   infoRow: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
   infoTxt: { color: "#eaf1ff", fontSize: 14 },
+
   fieldLabel: { color: "#cdd9ff", fontWeight: "700" },
+
   inputWrap: {
     flexDirection: "row", alignItems: "center", marginTop: 8,
     borderBottomWidth: 1, borderBottomColor: "rgba(214,228,255,0.4)", paddingBottom: 4,
   },
   input: { flex: 1, minHeight: 40, color: "#eaf1ff" },
+
   selectWrap: {
     flexDirection: "row", alignItems: "center", marginTop: 8,
     borderBottomWidth: 1, borderBottomColor: "rgba(214,228,255,0.4)", paddingBottom: 4,
@@ -284,8 +288,9 @@ const styles = StyleSheet.create({
     borderRadius: 12, backgroundColor: "rgba(255,255,255,0.05)", overflow: "hidden",
   },
   iosPickerItem: { color: "#eaf1ff", height: 180, fontSize: 14 },
-  bottomBar: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 16, paddingBottom: 24 },
-  bottomBtn: { borderRadius: 16, overflow: "hidden" },
-  bottomPress: { paddingVertical: 16, alignItems: "center" },
-  bottomTxt: { color: "#fff", fontWeight: "800", fontSize: 16 },
+
+  
+  btn: { marginTop: 12, borderRadius: 14, overflow: "hidden" },
+  btnPress: { paddingVertical: 14, alignItems: "center" },
+  btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });
