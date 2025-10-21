@@ -11,7 +11,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function HomeDoutor({ medico, onLogout, onGoBuscarExames }) {
-  const nome = medico?.nome || "Dr. Ciclano";
+  const nome = (medico?.nome || 'Ciclano').trim();
+  const genero = (medico?.genero || '').toLowerCase();
+  const prefixo =
+    genero === 'feminino' ? 'Dra.' :
+    genero === 'masculino' ? 'Dr.' :
+    'Dr(a).';
 
   return (
     <LinearGradient
@@ -24,7 +29,7 @@ export default function HomeDoutor({ medico, onLogout, onGoBuscarExames }) {
         <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
 
         <View style={styles.header}>
-          <Text style={styles.headerText}>Olá Dr {nome}!</Text>
+          <Text style={styles.headerText}>Olá {prefixo} {nome}!</Text>
           <View style={styles.profileCircle}>
             <Ionicons name="person-outline" size={32} color="#3E1B83" />
           </View>
@@ -59,13 +64,29 @@ export default function HomeDoutor({ medico, onLogout, onGoBuscarExames }) {
               <Text style={styles.label}>Exames</Text>
             </TouchableOpacity>
           </View>
+
+         
+          <View style={{ height: 100 }} />
         </View>
 
         {!!onLogout && (
-          <View style={{ alignItems: 'center', marginBottom: 16 }}>
-            <TouchableOpacity onPress={onLogout} style={{ padding: 10 }}>
-              <Text style={{ color: '#eaf1ff' }}>Sair</Text>
-            </TouchableOpacity>
+          <View style={styles.bottomBar}>
+            <LinearGradient
+              colors={['#2f6edb', '#1f4fb6']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.bottomBtn}
+            >
+              <TouchableOpacity
+                onPress={onLogout}
+                style={styles.bottomPress}
+                accessibilityRole="button"
+                accessibilityLabel="Sair da conta"
+              >
+                <Ionicons name="log-out-outline" size={22} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.bottomTxt}>Sair</Text>
+              </TouchableOpacity>
+            </LinearGradient>
           </View>
         )}
       </SafeAreaView>
@@ -136,5 +157,34 @@ const styles = StyleSheet.create({
     color: '#eaf1ff',
     textAlign: 'center',
     fontWeight: '600',
+  },
+
+ 
+  bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 16,        
+    paddingHorizontal: 16,
+  },
+  bottomBtn: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  bottomPress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,   
+  },
+  bottomTxt: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 18,            
   },
 });
