@@ -6,7 +6,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function HomeScreen({ user, onLogout }) {
-  const nome = user?.nome || 'Fulano';
+  const nome = (user?.nome || 'Fulano').trim();
+  const genero = (user?.genero || '').toLowerCase();
+
+  const saudacao =
+    genero === 'feminino' ? 'Seja Bem-Vinda' :
+    genero === 'masculino' ? 'Seja Bem-Vindo' :
+    'Seja Bem-Vindo(a)';
 
   return (
     <LinearGradient
@@ -19,7 +25,7 @@ export default function HomeScreen({ user, onLogout }) {
         <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
 
         <View style={styles.header}>
-          <Text style={styles.headerText}>Seja Bem-Vindo, {nome}</Text>
+          <Text style={styles.headerText}>{saudacao}, {nome}</Text>
           <View style={styles.profileCircle}>
             <Ionicons name="person-outline" size={32} color="#3E1B83" />
           </View>
@@ -49,13 +55,29 @@ export default function HomeScreen({ user, onLogout }) {
               <Text style={styles.label}>Exames</Text>
             </TouchableOpacity>
           </View>
+
+      
+          <View style={{ height: 100 }} />
         </View>
 
         {!!onLogout && (
-          <View style={{ alignItems: 'center', marginBottom: 16 }}>
-            <TouchableOpacity onPress={onLogout} style={{ padding: 10 }}>
-              <Text style={{ color: '#eaf1ff' }}>Sair</Text>
-            </TouchableOpacity>
+          <View style={styles.bottomBar}>
+            <LinearGradient
+              colors={['#2f6edb', '#1f4fb6']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.bottomBtn}
+            >
+              <TouchableOpacity
+                onPress={onLogout}
+                style={styles.bottomPress}
+                accessibilityRole="button"
+                accessibilityLabel="Sair da conta"
+              >
+                <Ionicons name="log-out-outline" size={22} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.bottomTxt}>Sair</Text>
+              </TouchableOpacity>
+            </LinearGradient>
           </View>
         )}
       </SafeAreaView>
@@ -65,24 +87,51 @@ export default function HomeScreen({ user, onLogout }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
   header: {
-    paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row',
-    alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 16, paddingHorizontal: 20,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
   headerText: { color: '#eaf1ff', fontSize: 20, fontWeight: '700' },
+
   profileCircle: {
     width: 48, height: 48, borderRadius: 24, borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.9)',
     justifyContent: 'center', alignItems: 'center',
   },
+
   grid: { marginTop: 24, alignItems: 'center', paddingHorizontal: 16 },
+
   row: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 16 },
+
   iconBox: {
     width: '48%', height: 130, borderRadius: 20, borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.18)', backgroundColor: 'rgba(255,255,255,0.10)',
     justifyContent: 'center', alignItems: 'center', padding: 12,
     shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 20, shadowOffset: { width: 0, height: 10 },
   },
-  label: { marginTop: 10, fontSize: 14, color: '#eaf1ff', textAlign: 'center', fontWeight: '600' },
-});
 
+  label: { marginTop: 10, fontSize: 14, color: '#eaf1ff', textAlign: 'center', fontWeight: '600' },
+
+  
+  bottomBar: {
+    position: 'absolute',
+    left: 0, right: 0, bottom: 16,
+    paddingHorizontal: 16,
+  },
+  bottomBtn: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  bottomPress: {
+    flexDirection: 'row',
+    alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 18,
+  },
+  bottomTxt: { color: '#fff', fontWeight: '800', fontSize: 18 },
+});
