@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
 
   link: { color: "#cdd9ff", textAlign: "center", fontWeight: "600" },
 
-  // FAB fixo
+  
   fabMedico: {
     position: "absolute",
     bottom: 26,

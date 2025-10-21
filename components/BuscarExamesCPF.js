@@ -28,9 +28,7 @@ export default class BuscarExamesCPF extends React.Component {
     };
   }
 
-  
   somenteDigitos = (v) => (v || "").replace(/\D+/g, "");
-
   formatarCPF = (v) => {
     const d = this.somenteDigitos(v).slice(0, 11);
     if (d.length <= 3) return d;
@@ -38,11 +36,10 @@ export default class BuscarExamesCPF extends React.Component {
     if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
     return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
   };
-
   validarCPF = (v) => {
     const s = this.somenteDigitos(v);
     if (s.length !== 11) return false;
-    if (/^(\d)\1+$/.test(s)) return false; 
+    if (/^(\d)\1+$/.test(s)) return false;
     let soma = 0;
     for (let i = 0; i < 9; i++) soma += parseInt(s[i], 10) * (10 - i);
     let dv1 = 11 - (soma % 11);
@@ -55,46 +52,46 @@ export default class BuscarExamesCPF extends React.Component {
     return dv2 === parseInt(s[10], 10);
   };
 
- 
   isPendente = (status) => {
     const s = String(status || "").toLowerCase();
     return s.includes("solic") || s.includes("pend") || s.includes("aguard");
   };
+  isLiberado = (status) => {
+    const s = String(status || "").toLowerCase();
+    return (
+      s.includes("liber") ||
+      s.includes("pronto") ||
+      s.includes("conclu") ||
+      s.includes("final") ||
+      s.includes("ok")
+    );
+  };
 
   statusIcon = (status) => {
     const s = String(status || "").toLowerCase();
-    if (this.isPendente(s)) return "clock-outline"; // Solicitado / Pendente / Aguardando
-    if (s.includes("aceit") || s.includes("confirm")) return "check-circle-outline"; // Aceito / Confirmado
-    if (s.includes("liber") || s.includes("pronto") || s.includes("conclu") || s.includes("final") || s.includes("ok"))
-      return "check-decagram"; // Liberado / Pronto / Concluído
+    if (this.isPendente(s)) return "clock-outline";
+    if (s.includes("aceit") || s.includes("confirm")) return "check-circle-outline";
+    if (this.isLiberado(s)) return "check-decagram";
     if (s.includes("recus") || s.includes("rejei") || s.includes("cancel") || s.includes("erro") || s.includes("falh"))
-      return "alert-circle"; // Recusado / Cancelado / Erro
+      return "alert-circle";
     return "file-document";
   };
 
   statusChipStyle = (status) => {
     const s = String(status || "").toLowerCase();
-    if (this.isPendente(s))
-      return { bg: "rgba(255,205,86,0.15)", border: "rgba(255,205,86,0.45)" }; // amarelo
-    if (s.includes("aceit") || s.includes("confirm"))
-      return { bg: "rgba(54,162,235,0.15)", border: "rgba(54,162,235,0.45)" }; // azul
-    if (s.includes("liber") || s.includes("pronto") || s.includes("conclu") || s.includes("final") || s.includes("ok"))
-      return { bg: "rgba(75,192,192,0.15)", border: "rgba(75,192,192,0.45)" }; // verde
+    if (this.isPendente(s)) return { bg: "rgba(255,205,86,0.15)", border: "rgba(255,205,86,0.45)" };
+    if (s.includes("aceit") || s.includes("confirm")) return { bg: "rgba(54,162,235,0.15)", border: "rgba(54,162,235,0.45)" };
+    if (this.isLiberado(s)) return { bg: "rgba(75,192,192,0.15)", border: "rgba(75,192,192,0.45)" };
     if (s.includes("recus") || s.includes("rejei") || s.includes("cancel") || s.includes("erro") || s.includes("falh"))
-      return { bg: "rgba(255,99,132,0.15)", border: "rgba(255,99,132,0.45)" }; // vermelho
-    return { bg: "rgba(214,228,255,0.12)", border: "rgba(214,228,255,0.28)" }; // neutro
+      return { bg: "rgba(255,99,132,0.15)", border: "rgba(255,99,132,0.45)" };
+    return { bg: "rgba(214,228,255,0.12)", border: "rgba(214,228,255,0.28)" };
   };
-
 
   buscar = async () => {
     try {
       const { cpf } = this.state;
       const cpfN = this.somenteDigitos(cpf);
-
-      if (cpfN.length !== 11) {
-        return Alert.alert("CPF inválido", "Informe 11 dígitos.");
-      }
-
+      if (cpfN.length !== 11) return Alert.alert("CPF inválido", "Informe 11 dígitos.");
       this.setState({ carregando: true });
 
       const [pacSemPrefixo, pacComPrefixo, examesStr] = await Promise.all([
@@ -121,7 +118,6 @@ export default class BuscarExamesCPF extends React.Component {
         return Alert.alert("CPF inválido", "Verifique o número informado.");
       }
 
-   
       this.setState({ carregando: false, buscou: true, paciente: null, exames: [] });
       Alert.alert("Não encontrado", "Nenhum paciente para este CPF.");
     } catch (e) {
@@ -134,16 +130,11 @@ export default class BuscarExamesCPF extends React.Component {
     this.setState({ cpf: "", paciente: null, exames: [], carregando: false, buscou: false });
   };
 
-
   confirmarCancelamento = (exame) => {
-    Alert.alert(
-      "Cancelar exame?",
-      "Tem certeza que deseja cancelar esta solicitação?",
-      [
-        { text: "Não" },
-        { text: "Sim, cancelar", style: "destructive", onPress: () => this.cancelarExame(exame) },
-      ]
-    );
+    Alert.alert("Cancelar exame?", "Tem certeza que deseja cancelar esta solicitação?", [
+      { text: "Não" },
+      { text: "Sim, cancelar", style: "destructive", onPress: () => this.cancelarExame(exame) },
+    ]);
   };
 
   cancelarExame = async (exame) => {
@@ -156,20 +147,12 @@ export default class BuscarExamesCPF extends React.Component {
 
       const listaStr = await AsyncStorage.getItem(key);
       const lista = listaStr ? JSON.parse(listaStr) : [];
-      const novaLista = lista.map((e) => {
-        if (e.id === exame.id) {
-          return {
-            ...e,
-            status: "Cancelado",
-            canceladoEm: new Date().toISOString(),
-          };
-        }
-        return e;
-      });
+      const novaLista = lista.map((e) =>
+        e.id === exame.id ? { ...e, status: "Cancelado", canceladoEm: new Date().toISOString() } : e
+      );
 
       await AsyncStorage.setItem(key, JSON.stringify(novaLista));
 
-      // reflete na tela
       this.setState({
         exames: this.state.exames.map((e) =>
           e.id === exame.id ? { ...e, status: "Cancelado", canceladoEm: new Date().toISOString() } : e
@@ -184,6 +167,14 @@ export default class BuscarExamesCPF extends React.Component {
     }
   };
 
+  visualizarExame = (exame) => {
+  
+    if (this.props.onVisualizarExame) {
+      this.props.onVisualizarExame(exame);
+    } else {
+      Alert.alert("Visualizar exame", exame.resultado || "Abrir visualização/laudo do exame.");
+    }
+  };
 
   Input = ({ icon, placeholder, keyboardType, value, onChangeText, maxLength }) => (
     <View style={styles.inputWrap}>
@@ -244,6 +235,7 @@ export default class BuscarExamesCPF extends React.Component {
             const chip = this.statusChipStyle(ex.status);
             const pendente = this.isPendente(ex.status);
             const isCanc = cancelandoId === ex.id;
+            const podeVer = Boolean(ex.realizado) && this.isLiberado(ex.status);
 
             return (
               <View key={ex.id || idx} style={styles.examCard}>
@@ -271,24 +263,47 @@ export default class BuscarExamesCPF extends React.Component {
                   </View>
                 ) : null}
 
-                {pendente && (
-                  <Pressable
-                    onPress={() => this.confirmarCancelamento(ex)}
-                    style={styles.cancelBtn}
-                    disabled={isCanc}
-                    accessibilityRole="button"
-                    accessibilityLabel="Cancelar exame pendente"
+                
+                <View style={styles.actionsRow}>
+                 
+                  <LinearGradient
+                    colors={["#2f6edb", "#1f4fb6"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[styles.viewBtn, !podeVer && { opacity: 0.5 }]}
                   >
-                    {isCanc ? (
-                      <ActivityIndicator />
-                    ) : (
-                      <>
-                        <MaterialCommunityIcons name="close-circle-outline" size={18} color="#ff6b81" style={{ marginRight: 6 }} />
-                        <Text style={styles.cancelBtnTxt}>Cancelar exame</Text>
-                      </>
-                    )}
-                  </Pressable>
-                )}
+                    <Pressable
+                      onPress={() => this.visualizarExame(ex)}
+                      style={styles.viewPress}
+                      disabled={!podeVer}
+                      accessibilityRole="button"
+                      accessibilityLabel="Visualizar exame"
+                    >
+                      <MaterialCommunityIcons name="file-eye-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+                      <Text style={styles.viewBtnTxt}>Visualizar exame</Text>
+                    </Pressable>
+                  </LinearGradient>
+
+                 
+                  {pendente && (
+                    <Pressable
+                      onPress={() => this.confirmarCancelamento(ex)}
+                      style={styles.cancelBtn}
+                      disabled={isCanc}
+                      accessibilityRole="button"
+                      accessibilityLabel="Cancelar exame pendente"
+                    >
+                      {isCanc ? (
+                        <ActivityIndicator />
+                      ) : (
+                        <>
+                          <MaterialCommunityIcons name="close-circle-outline" size={18} color="#ff6b81" style={{ marginRight: 6 }} />
+                          <Text style={styles.cancelBtnTxt}>Cancelar</Text>
+                        </>
+                      )}
+                    </Pressable>
+                  )}
+                </View>
               </View>
             );
           })
@@ -296,7 +311,6 @@ export default class BuscarExamesCPF extends React.Component {
       </View>
     );
   }
-
 
   handleSolicitarExame = () => {
     const { paciente, cpf } = this.state;
@@ -315,7 +329,6 @@ export default class BuscarExamesCPF extends React.Component {
     return (
       <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        
           {this.props.onVoltar && (
             <View style={styles.topRight}>
               <Pressable
@@ -329,7 +342,6 @@ export default class BuscarExamesCPF extends React.Component {
             </View>
           )}
 
-         
           <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
             <View style={styles.card}>
               <Text style={styles.title}>Buscar Exames por CPF</Text>
@@ -356,7 +368,6 @@ export default class BuscarExamesCPF extends React.Component {
               {this.renderPaciente()}
               {this.renderExames()}
 
-     
               {paciente && (
                 <LinearGradient
                   colors={["#2f6edb", "#1f4fb6"]}
@@ -383,7 +394,6 @@ export default class BuscarExamesCPF extends React.Component {
 }
 
 const styles = StyleSheet.create({
- 
   center: { flexGrow: 1, padding: 20, paddingBottom: 20 },
 
   topRight: { position: "absolute", top: 50, right: 20, zIndex: 10 },
@@ -422,20 +432,12 @@ const styles = StyleSheet.create({
   btn: { marginTop: 12, borderRadius: 14, overflow: "hidden" },
   btnPress: { paddingVertical: 14, alignItems: "center" },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
-
   link: { color: "#cdd9ff", textAlign: "center", fontWeight: "600" },
 
-  section: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(214,228,255,0.18)",
-  },
+  section: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: "rgba(214,228,255,0.18)" },
   sectionTitle: { color: "#eaf1ff", fontSize: 18, fontWeight: "700", marginBottom: 8 },
-
   infoRow: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
   infoTxt: { color: "#eaf1ff", fontSize: 14 },
-
   emptyTxt: { color: "#cdd9ff", fontStyle: "italic" },
 
   examCard: {
@@ -451,18 +453,16 @@ const styles = StyleSheet.create({
   examLabel: { color: "#cdd9ff", width: 110 },
   examValue: { color: "#eaf1ff", fontWeight: "600" },
 
-  chip: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-    borderWidth: 1,
-  },
+  chip: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, borderWidth: 1 },
   chipTxt: { color: "#eaf1ff", fontWeight: "700", fontSize: 12 },
 
-  // botão cancelar
+  actionsRow: { flexDirection: "row", alignItems: "center", marginTop: 10 },
+  viewBtn: { borderRadius: 12, overflow: "hidden" },
+  viewPress: { paddingVertical: 8, paddingHorizontal: 12, flexDirection: "row", alignItems: "center" },
+  viewBtnTxt: { color: "#fff", fontWeight: "800" },
+
   cancelBtn: {
-    marginTop: 10,
-    alignSelf: "flex-start",
+    marginLeft: 10,
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
