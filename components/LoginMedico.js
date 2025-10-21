@@ -66,13 +66,14 @@ export default class LoginMedico extends React.Component {
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
       >
+     
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{ flex: 1 }}
         >
           <View style={{ flex: 1 }}>
             <View style={styles.center}>
-         
+            
               <View
                 style={styles.brandWrap}
                 accessible
@@ -146,7 +147,6 @@ export default class LoginMedico extends React.Component {
                   </Pressable>
                 </LinearGradient>
 
-           
                 <Pressable
                   style={{ marginTop: 12 }}
                   onPress={() => this.props.onGoCadastroMedico?.()}
@@ -155,23 +155,22 @@ export default class LoginMedico extends React.Component {
                 </Pressable>
               </View>
             </View>
-
-       
-            <Pressable
-              onPress={() => this.props.onGoLoginUsuario?.()}
-              style={styles.fabMedico}
-              accessibilityLabel="Voltar para login de usuário"
-              accessibilityRole="button"
-            >
-              <MaterialCommunityIcons name="account" size={28} color="#fff" />
-            </Pressable>
           </View>
         </KeyboardAvoidingView>
+
+
+        <Pressable
+          onPress={() => this.props.onGoLoginUsuario?.()}
+          style={styles.fabMedico}
+          accessibilityLabel="Voltar para login de usuário"
+          accessibilityRole="button"
+        >
+          <MaterialCommunityIcons name="account" size={28} color="#fff" />
+        </Pressable>
       </LinearGradient>
     );
   }
 }
-
 
 const ROYAL = "#2f6edb";
 const ACCENT = "#00E5FF";
@@ -236,6 +235,7 @@ const styles = StyleSheet.create({
 
   link: { color: "#cdd9ff", textAlign: "center", fontWeight: "600" },
 
+
   fabMedico: {
     position: "absolute",
     bottom: 26,
@@ -250,8 +250,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 1 },
-    elevation: 10,
+    elevation: 12,
     borderWidth: 2,
     borderColor: "#fff",
+    zIndex: 999,
   },
 });

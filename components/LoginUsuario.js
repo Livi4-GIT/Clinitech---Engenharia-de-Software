@@ -46,12 +46,26 @@ export default class LoginUsuario extends React.Component {
     const { cpf, senha } = this.state;
 
     return (
-      <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+      <LinearGradient
+        colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+   
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
           <View style={{ flex: 1 }}>
             <View style={styles.center}>
-              {/* Marca */}
-              <View style={styles.brandWrap} accessible accessibilityRole="header" accessibilityLabel="ClinicTech">
+            
+              <View
+                style={styles.brandWrap}
+                accessible
+                accessibilityRole="header"
+                accessibilityLabel="ClinicTech"
+              >
                 <Text style={styles.brandName}>
                   <Text style={styles.brandClinic}>Clinic</Text>
                   <Text style={styles.brandTech}>Tech</Text>
@@ -62,7 +76,12 @@ export default class LoginUsuario extends React.Component {
                 <Text style={styles.title}>Entrar</Text>
 
                 <View style={styles.inputWrap}>
-                  <MaterialCommunityIcons name="card-account-details" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                  <MaterialCommunityIcons
+                    name="card-account-details"
+                    size={20}
+                    color="#d6e4ff"
+                    style={{ marginRight: 8 }}
+                  />
                   <TextInput
                     style={styles.input}
                     placeholder="CPF (000.000.000-00)"
@@ -76,7 +95,12 @@ export default class LoginUsuario extends React.Component {
                 </View>
 
                 <View style={styles.inputWrap}>
-                  <MaterialCommunityIcons name="lock" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                  <MaterialCommunityIcons
+                    name="lock"
+                    size={20}
+                    color="#d6e4ff"
+                    style={{ marginRight: 8 }}
+                  />
                   <TextInput
                     style={styles.input}
                     placeholder="Senha"
@@ -88,39 +112,45 @@ export default class LoginUsuario extends React.Component {
                   />
                 </View>
 
-                <LinearGradient colors={["#2f6edb", "#1f4fb6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.btn}>
+                <LinearGradient
+                  colors={["#2f6edb", "#1f4fb6"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.btn}
+                >
                   <Pressable onPress={this.entrar} style={styles.btnPress}>
                     <Text style={styles.btnText}>Entrar</Text>
                   </Pressable>
                 </LinearGradient>
 
-                <Pressable style={{ marginTop: 12 }} onPress={() => this.props.onGoCadastro?.()}>
+                <Pressable
+                  style={{ marginTop: 12 }}
+                  onPress={() => this.props.onGoCadastro?.()}
+                >
                   <Text style={styles.link}>Criar conta</Text>
                 </Pressable>
               </View>
             </View>
-
-         
-            <Pressable
-              onPress={() => this.props.onGoLoginMedico?.()}
-              style={styles.fabMedico}
-              accessibilityLabel="Entrar como médico"
-              accessibilityRole="button"
-            >
-              <MaterialCommunityIcons name="doctor" size={28} color="#fff" />
-            </Pressable>
           </View>
         </KeyboardAvoidingView>
+
+       
+        <Pressable
+          onPress={() => this.props.onGoLoginMedico?.()}
+          style={styles.fabMedico}
+          accessibilityLabel="Entrar como médico"
+          accessibilityRole="button"
+        >
+          <MaterialCommunityIcons name="doctor" size={28} color="#fff" />
+        </Pressable>
       </LinearGradient>
     );
   }
 }
 
-
 const ROYAL = "#2f6edb";
 const ACCENT = "#00E5FF";
-const STRONG = "#0D47A1"; 
-
+const STRONG = "#0D47A1";
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", padding: 20 },
@@ -157,7 +187,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.18)",
   },
-  title: { color: "#eaf1ff", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 16 },
+  title: {
+    color: "#eaf1ff",
+    fontSize: 22,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 16,
+  },
 
   inputWrap: {
     flexDirection: "row",
@@ -175,11 +211,11 @@ const styles = StyleSheet.create({
 
   link: { color: "#cdd9ff", textAlign: "center", fontWeight: "600" },
 
-  
+  // FAB fixo
   fabMedico: {
     position: "absolute",
     bottom: 26,
-    alignSelf: "center",         
+    alignSelf: "center",
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -190,8 +226,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 1 },
-    elevation: 10,
-    borderWidth:2 ,
+    elevation: 12,
+    borderWidth: 2,
     borderColor: "#fff",
+    zIndex: 999, 
   },
 });
