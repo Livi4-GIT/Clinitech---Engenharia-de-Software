@@ -1,4 +1,3 @@
-// App.js
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
@@ -14,6 +13,7 @@ import HomeDoutor from "./components/HomeDoutor";
 import BuscarExamesCPF from "./components/BuscarExamesCPF";
 import SolicitarExame from "./components/SolicitarExame";
 import CadastrarConvenio from "./components/CadastrarConvenio";
+import AtualizarConvenio from "./components/AtualizarConvenio";
 
 export default function App() {
   const [screen, setScreen] = useState("cadastrarConvenio");
@@ -117,14 +117,20 @@ export default function App() {
           initialCpf={examCpf}
           paciente={examPaciente}
           onVoltar={() => setScreen("buscarExames")}
-          onSaved={() => {
-            setScreen("buscarExames");
-          }}
+          onSaved={() => setScreen("buscarExames")}
         />
       )}
 
       {screen === "cadastrarConvenio" && (
         <CadastrarConvenio
+          onVoltar={() => setScreen("homeUsuario")}
+          onSaved={() => setScreen("homeUsuario")}
+          onGoAtualizarConvenio={() => setScreen("atualizarConvenio")}
+        />
+      )}
+
+      {screen === "atualizarConvenio" && (
+        <AtualizarConvenio
           onVoltar={() => setScreen("homeUsuario")}
           onSaved={() => setScreen("homeUsuario")}
         />
