@@ -76,6 +76,7 @@ export default function App() {
         <CadastroMedico
           onAfterSave={() => setScreen("loginMedico")}
           onCancelar={() => setScreen("loginMedico")}
+          onVoltar={() => setScreen("loginMedico")}
         />
       )}
 

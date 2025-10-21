@@ -32,7 +32,7 @@ export default class CadastroMedico extends React.Component {
     };
   }
 
-
+  // === utils ===
   somenteDigitos = (v) => (v || "").replace(/\D+/g, "");
   senhaForte = (v) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(v || "");
   validarDataBR = (v) => {
@@ -60,6 +60,14 @@ export default class CadastroMedico extends React.Component {
     const d = this.somenteDigitos(v).slice(0, 8);
     if (d.length <= 5) return d;
     return `${d.slice(0, 5)}-${d.slice(5)}`;
+  };
+
+  // === handlers ===
+  handleVoltar = () => {
+    const { onVoltar, onVoltarLoginMedico, onCancelar } = this.props;
+    if (typeof onVoltar === "function") return onVoltar();
+    if (typeof onVoltarLoginMedico === "function") return onVoltarLoginMedico();
+    if (typeof onCancelar === "function") return onCancelar();
   };
 
   gravar = async () => {
@@ -125,6 +133,7 @@ export default class CadastroMedico extends React.Component {
     }
   };
 
+  // === subcomponentes ===
   Input = ({
     icon,
     placeholder,
@@ -162,7 +171,7 @@ export default class CadastroMedico extends React.Component {
             color="#d6e4ff"
             style={{ marginRight: 8, marginTop: 2 }}
           />
-          <Text style={styles.labelGenero}>Gênero</Text>
+        <Text style={styles.labelGenero}>Gênero</Text>
         </View>
         <View style={styles.chipsWrap}>
           {GENDER_OPTIONS.map((opt) => {
@@ -198,7 +207,7 @@ export default class CadastroMedico extends React.Component {
           {/* Voltar para Login Médico */}
           <View style={styles.topRight}>
             <Pressable
-              onPress={() => this.props.onVoltarLoginMedico?.()}
+              onPress={this.handleVoltar}
               style={styles.topRightBtn}
               accessibilityRole="button"
               accessibilityLabel="Voltar para Login Médico"
@@ -355,7 +364,6 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   input: { flex: 1, height: 40, color: "#eaf1ff" },
-
 
   genderSection: { marginTop: SP, marginBottom: SP },
   genderHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
