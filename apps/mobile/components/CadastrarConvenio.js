@@ -2,19 +2,22 @@ import React, { useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity,
   StatusBar, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert,
-  SafeAreaView
+  SafeAreaView, Modal, Pressable
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 
-const BANDEIRAS = ["Unimed", "Amil", "SulAmérica", "Bradesco", "Hapvida", "Outra"];
+const BANDEIRAS = ["Unimed", "Amil", "SulAmérica", "Bradesco", "Hapvida", "Allianz Saúde", "Outra"];
 
 export default function CadastrarConvenio({ onVoltar, onSaved }) {
   const [bandeira, setBandeira] = useState(BANDEIRAS[0]);
   const [bandeiraOutra, setBandeiraOutra] = useState("");
   const [numero, setNumero] = useState("");
   const [nome, setNome] = useState("");
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [tempBandeira, setTempBandeira] = useState(bandeira);
 
   const bandeiraValue = bandeira === "Outra" ? bandeiraOutra.trim() : bandeira;
 
@@ -28,6 +31,16 @@ export default function CadastrarConvenio({ onVoltar, onSaved }) {
       return;
     }
     Alert.alert("Sucesso", "Convênio cadastrado!", [{ text: "OK", onPress: () => onSaved?.() }]);
+  };
+
+  const openPicker = () => {
+    setTempBandeira(bandeira);
+    setPickerOpen(true);
+  };
+
+  const confirmPicker = () => {
+    setBandeira(tempBandeira);
+    setPickerOpen(false);
   };
 
   return (
@@ -46,18 +59,11 @@ export default function CadastrarConvenio({ onVoltar, onSaved }) {
           <ScrollView contentContainerStyle={styles.formWrap}>
             <Text style={styles.sectionLabel}>Bandeira do convênio</Text>
 
-            <View style={styles.pickerWrap}>
-              <Picker
-                selectedValue={bandeira}
-                onValueChange={(val) => setBandeira(val)}
-                style={styles.picker}
-                mode={Platform.OS === "ios" ? "dialog" : "dropdown"}
-              >
-                {BANDEIRAS.map((opt) => (
-                  <Picker.Item key={opt} label={opt} value={opt} />
-                ))}
-              </Picker>
-            </View>
+            {/* Campo "select" com o mesmo estilo do input */}
+            <Pressable style={[styles.input, styles.selectInput]} onPress={openPicker}>
+              <Text style={styles.selectText}>{bandeira}</Text>
+              <Ionicons name="chevron-down" size={18} color="#eaf1ff" style={{ opacity: 0.9 }} />
+            </Pressable>
 
             {bandeira === "Outra" && (
               <TextInput
@@ -99,6 +105,39 @@ export default function CadastrarConvenio({ onVoltar, onSaved }) {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* Modal com Picker */}
+      <Modal
+        transparent
+        visible={pickerOpen}
+        animationType="fade"
+        onRequestClose={() => setPickerOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Selecione a bandeira</Text>
+            <View style={styles.modalPickerWrap}>
+              <Picker
+                selectedValue={tempBandeira}
+                onValueChange={setTempBandeira}
+              >
+                {BANDEIRAS.map((opt) => (
+                  <Picker.Item key={opt} label={opt} value={opt} />
+                ))}
+              </Picker>
+            </View>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setPickerOpen(false)} style={[styles.modalBtn, styles.btnGhost]}>
+                <Text style={styles.modalBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmPicker} style={[styles.modalBtn, styles.btnPrimary]}>
+                <Text style={[styles.modalBtnText, styles.modalBtnTextStrong]}>Selecionar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
@@ -113,23 +152,24 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.12)", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
   },
   headerTitle: { color: "#eaf1ff", fontSize: 16, fontWeight: "700" },
+
   formWrap: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 24, gap: 12 },
   sectionLabel: { color: "#eaf1ff", fontSize: 14, fontWeight: "700", marginBottom: 4 },
-
-  pickerWrap: {
-    backgroundColor: "rgba(255,255,255,0.95)",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.35)",
-    overflow: "hidden",
-  },
-  picker: { width: "100%" },
 
   input: {
     backgroundColor: "rgba(255,255,255,0.20)",
     borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12,
     color: "#eaf1ff", fontSize: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
   },
+
+  /* Select com cara de input */
+  selectInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  selectText: { color: "#eaf1ff", fontSize: 14, fontWeight: "600" },
+
   submitBtn: {
     alignSelf: "center", marginTop: 8,
     backgroundColor: "#3E1B83", borderRadius: 8,
@@ -137,4 +177,44 @@ const styles = StyleSheet.create({
     shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 6 },
   },
   submitTxt: { color: "#eaf1ff", fontSize: 14, fontWeight: "700" },
+
+  /* Modal */
+  modalOverlay: {
+    flex: 1, backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center", justifyContent: "center",
+    padding: 20,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: "rgba(255,255,255,0.98)",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+  },
+  modalTitle: { fontSize: 16, fontWeight: "700", color: "#0a1a3f", marginBottom: 8 },
+  modalPickerWrap: {
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.08)",
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+    marginTop: 12,
+  },
+  modalBtn: {
+    paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8,
+  },
+  btnGhost: {
+    backgroundColor: "transparent",
+  },
+  btnPrimary: {
+    backgroundColor: "#3E1B83",
+  },
+  modalBtnText: { color: "#0a1a3f", fontWeight: "700" },
+  modalBtnTextStrong: { color: "#fff" },
 });
