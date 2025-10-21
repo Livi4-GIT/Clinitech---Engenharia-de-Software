@@ -10,8 +10,8 @@ import CadastroMedico from "./components/CadastroMedico";
 
 import HomeUsuario from "./components/HomeUsuario";
 import HomeDoutor from "./components/HomeDoutor";
-import BuscarExamesCPF from "./components/BuscarExamesCPF";
-import SolicitarExame from "./components/SolicitarExame"; 
+import BuscarExamesCPF from "./apps/mobile/components/BuscarExamesCPF";
+import SolicitarExame from "./apps/mobile/components/SolicitarExame"; 
 
 export default function App() {
   const [screen, setScreen] = useState("login");

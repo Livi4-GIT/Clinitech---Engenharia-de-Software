@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
+
 import LoginUsuario from "./components/LoginUsuario";
 import CadastroUsuario from "./components/CadastroUsuario";
 import LoginMedico from "./components/LoginMedico";
@@ -8,15 +9,22 @@ import ConfirmacaoCadastroMedico from "./components/ConfirmacaoCadastroMedico";
 import CadastroMedico from "./components/CadastroMedico";
 
 import HomeUsuario from "./components/HomeUsuario";
-import HomeDoutor from "./components/HomeDoutor"; // ✅ este é o home do médico que você criou
+import HomeDoutor from "./components/HomeDoutor";
+import BuscarExamesCPF from "./apps/mobile/components/BuscarExamesCPF";
+import SolicitarExame from "./apps/mobile/components/SolicitarExame"; 
 
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
 
+
+  const [examCpf, setExamCpf] = useState(null);
+  const [examPaciente, setExamPaciente] = useState(null);
+
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
+    setMedico(null);
     setScreen("homeUsuario");
     console.log("LOGIN OK. Usuário:", u);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
@@ -49,7 +57,8 @@ export default function App() {
           onGoCadastroMedico={() => setScreen("confirmacaoCadastroMedico")}
           onLoginSuccess={(med) => {
             setMedico(med);
-            setScreen("homeDoutor"); // ✅ bate com o nome da tela abaixo
+            setUser(null);
+            setScreen("homeDoutor");
             console.log("Login médico OK", med);
             Alert.alert("Bem-vindo!", "Login médico realizado.");
           }}
@@ -71,11 +80,48 @@ export default function App() {
       )}
 
       {screen === "homeUsuario" && (
-        <HomeUsuario user={user} onLogout={() => setScreen("login")} />
+        <HomeUsuario
+          user={user}
+          onLogout={() => {
+            setUser(null);
+            setScreen("login");
+          }}
+          onGoBuscarExames={() => setScreen("buscarExames")}
+        />
       )}
 
-      {screen === "homeDoutor" && ( // ✅ condição certa
-        <HomeDoutor medico={medico} onLogout={() => setScreen("loginMedico")} />
+      {screen === "homeDoutor" && (
+        <HomeDoutor
+          medico={medico}
+          onLogout={() => {
+            setMedico(null);
+            setScreen("loginMedico");
+          }}
+          onGoBuscarExames={() => setScreen("buscarExames")}
+        />
+      )}
+
+      {screen === "buscarExames" && (
+        <BuscarExamesCPF
+          onVoltar={() => setScreen(user ? "homeUsuario" : medico ? "homeDoutor" : "login")}
+          onSolicitarExame={({ cpf, paciente }) => {
+            setExamCpf(cpf);
+            setExamPaciente(paciente);
+            setScreen("solicitarExame");
+          }}
+        />
+      )}
+
+      {screen === "solicitarExame" && (
+        <SolicitarExame
+          initialCpf={examCpf}
+          paciente={examPaciente}
+          onVoltar={() => setScreen("buscarExames")}
+          onSaved={() => {
+            
+            setScreen("buscarExames");
+          }}
+        />
       )}
 
       <StatusBar style="light" />
