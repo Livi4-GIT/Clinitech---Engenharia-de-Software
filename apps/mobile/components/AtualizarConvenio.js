@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StatusBar, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, Alert, SafeAreaView, Modal, Pressable
+  View, Text, TextInput, TouchableOpacity,
+  StatusBar, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert,
+  SafeAreaView, Modal, Pressable
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,12 +19,6 @@ export default function AtualizarConvenio({ onVoltar, onSaved }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [tempBandeira, setTempBandeira] = useState(bandeira);
 
-  useEffect(() => {
-    setBandeira("Unimed");
-    setNumero("1234567890");
-    setNome("Maria da Silva");
-  }, []);
-
   const bandeiraValue = bandeira === "Outra" ? bandeiraOutra.trim() : bandeira;
 
   const submit = () => {
@@ -36,6 +31,16 @@ export default function AtualizarConvenio({ onVoltar, onSaved }) {
       return;
     }
     Alert.alert("Sucesso", "Convênio atualizado!", [{ text: "OK", onPress: () => onSaved?.() }]);
+  };
+
+  const openPicker = () => {
+    setTempBandeira(bandeira);
+    setPickerOpen(true);
+  };
+
+  const confirmPicker = () => {
+    setBandeira(tempBandeira);
+    setPickerOpen(false);
   };
 
   return (
@@ -93,8 +98,8 @@ export default function AtualizarConvenio({ onVoltar, onSaved }) {
               onSubmitEditing={submit}
             />
 
-            <TouchableOpacity style={styles.submitBtn} onPress={submit}>
-              <Text style={styles.submitTxt}>Atualizar</Text>
+            <TouchableOpacity style={styles.btnOutline} onPress={submit}>
+              <Text style={styles.btnOutlineText}>Salvar alterações</Text>
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -111,6 +116,7 @@ export default function AtualizarConvenio({ onVoltar, onSaved }) {
                 ))}
               </Picker>
             </View>
+
             <View style={styles.modalActions}>
               <TouchableOpacity onPress={() => setPickerOpen(false)} style={[styles.modalBtn, styles.btnGhost]}>
                 <Text style={styles.modalBtnText}>Cancelar</Text>
@@ -136,39 +142,67 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.12)", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
   },
   headerTitle: { color: "#eaf1ff", fontSize: 16, fontWeight: "700" },
+
   formWrap: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 24, gap: 12 },
   sectionLabel: { color: "#eaf1ff", fontSize: 14, fontWeight: "700", marginBottom: 4 },
+
   input: {
     backgroundColor: "rgba(255,255,255,0.20)",
     borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12,
     color: "#eaf1ff", fontSize: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
   },
+
   selectInput: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   selectText: { color: "#eaf1ff", fontSize: 14, fontWeight: "600" },
-  submitBtn: {
-    alignSelf: "center", marginTop: 8,
-    backgroundColor: "#3E1B83", borderRadius: 8,
-    paddingVertical: 12, paddingHorizontal: 28,
-    shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 6 },
+
+  btnOutline: {
+    alignSelf: "center",
+    marginTop: 10,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.45)",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
   },
-  submitTxt: { color: "#eaf1ff", fontSize: 14, fontWeight: "700" },
+  btnOutlineText: { color: "#eaf1ff", fontSize: 14, fontWeight: "700" },
+
   modalOverlay: {
     flex: 1, backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center", justifyContent: "center", padding: 20,
+    alignItems: "center", justifyContent: "center",
+    padding: 20,
   },
   modalCard: {
-    width: "100%", backgroundColor: "rgba(255,255,255,0.98)",
-    borderRadius: 14, padding: 16, borderWidth: 1, borderColor: "rgba(255,255,255,0.35)",
+    width: "100%",
+    backgroundColor: "rgba(255,255,255,0.98)",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
   },
   modalTitle: { fontSize: 16, fontWeight: "700", color: "#0a1a3f", marginBottom: 8 },
   modalPickerWrap: {
-    borderRadius: 10, overflow: "hidden", backgroundColor: "#fff",
-    borderWidth: 1, borderColor: "rgba(0,0,0,0.08)",
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.08)",
   },
-  modalActions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 12 },
-  modalBtn: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8 },
-  btnGhost: { backgroundColor: "transparent" },
-  btnPrimary: { backgroundColor: "#3E1B83" },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+    marginTop: 12,
+  },
+  modalBtn: {
+    paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8,
+  },
+  btnGhost: {
+    backgroundColor: "transparent",
+  },
+  btnPrimary: {
+    backgroundColor: "#3E1B83",
+  },
   modalBtnText: { color: "#0a1a3f", fontWeight: "700" },
-  modalBtnTextStrong: { color: "#fff" }
+  modalBtnTextStrong: { color: "#fff" },
 });
