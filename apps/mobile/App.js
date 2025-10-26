@@ -30,6 +30,7 @@ export default function App() {
   const [examPaciente, setExamPaciente] = useState(null);
 
   const [medicoFiltrar, setMedicoFiltrar] = useState(null);
+  const [consultaAgendada, setConsultaAgendada] = useState(null);
 
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
@@ -155,8 +156,8 @@ export default function App() {
       {screen === "agendarConsulta" && (
         <AgendarConsulta 
           onVoltar={() => setScreen("inserirConsulta")}
-          onContinuar={(medicoSelecionado) => {
-            setMedicoFiltrar(medicoSelecionado);
+          onContinuar={(dadosConsulta) => {
+            setConsultaAgendada(dadosConsulta);
             setScreen("escolherHorario");       
           }}        
         />
@@ -178,7 +179,8 @@ export default function App() {
       {screen === "escolherHorario" && (
         <EscolherHorario
           onVoltar={() => setScreen("agendarConsulta")}
-          medicoFiltrar={medicoFiltrar}
+          onVoltarParaInserirConsulta={() => setScreen("inserirConsulta")}
+          consulta={consultaAgendada}
         />
 )}
 

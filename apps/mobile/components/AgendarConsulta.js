@@ -8,7 +8,7 @@ import { Picker } from "@react-native-picker/picker";
 const ESPECIALIDADES = ["Cardiologia", "Clínico Geral", "Dermatologia", "Endocrinologia", "Gastroenterologia", "Ginecologia", "Neurologia", "Nutrição", "Oftalmologia","Ortopedia", "Otorrinolaringologia", "Pediatria", "Psiquiatria", "Outra"];
 const PROCEDIMENTOS = ["Consulta de rotina - Presencial", "Consulta de rotina - Virtual", "Retorno", "Outra"];
 const LOCALIDADES = ["Unidade Alfa", "Unidade Beta", "Unidade Charlie", "Unidade Delta", "Unidade Echo", "Outra"];
-const MEDICOS = ["Todos", "Dr. João", "Dra. Maria", "Dr. Pedro"];
+const MEDICOS = ["Todos", "Dr. João", "Dra. Maria", "Dr. Pedro", "Dra. Cássia", "Dra. Gabriela"];
 
 export default function AgendarConsulta({ onVoltar, onContinuar }) {
   const [especialidade, setEspecialidade] = useState("");
@@ -48,24 +48,25 @@ const openPicker = (type, currentValue) => {
   const continuar = async () => {
   if (!(especialidade && procedimento && localidade)) return;
 
+  const dadosConsulta = {
+    especialidade,
+    procedimento,
+    localidade,
+    medicoFiltrar,
+    listaMedicos: MEDICOS
+  };
+
   try {
     await AsyncStorage.setItem("especialidade", especialidade);
     await AsyncStorage.setItem("procedimento", procedimento);
     await AsyncStorage.setItem("localidade", localidade);
     if (medicoFiltrar) await AsyncStorage.setItem("medicoFiltrar", medicoFiltrar);
 
-    Alert.alert(
-      "Sucesso!",
-      `Consulta agendada com:\nEspecialidade: ${especialidade}\nProcedimento: ${procedimento}\nLocalidade: ${localidade}\nMédico: ${medicoFiltrar || "Todos"}`
-    );
-
-    onContinuar?.(medicoFiltrar);
+    onContinuar?.(dadosConsulta);
   } catch (err) {
     console.log(err);
   }
 };
-
-
 
   const getOptions = () => {
   if (pickerType === "especialidade") return ESPECIALIDADES;
