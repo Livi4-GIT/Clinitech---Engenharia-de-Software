@@ -5,7 +5,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function HomeScreen({ navigation, user, onLogout, onGoCadastrarConvenio }) {
+export default function HomeScreen({ navigation, user, onLogout, onGoCadastrarConvenio, onGoInserirConsulta }) {
   const nome = user?.nome || 'Fulano';
 
   const abrirCadastrarConvenio = () => {
@@ -15,6 +15,13 @@ export default function HomeScreen({ navigation, user, onLogout, onGoCadastrarCo
       onGoCadastrarConvenio();
     }
   };
+
+  const abrirInserirConsultas = () => {
+    if (typeof onGoInserirConsulta === "function") {
+      onGoInserirConsulta();
+    }
+  };
+
 
   return (
     <LinearGradient
@@ -35,7 +42,7 @@ export default function HomeScreen({ navigation, user, onLogout, onGoCadastrarCo
 
         <View style={styles.grid}>
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox}>
+            <TouchableOpacity style={styles.iconBox} onPress={abrirInserirConsultas}>
               <Ionicons name="calendar-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Agendamentos</Text>
             </TouchableOpacity>

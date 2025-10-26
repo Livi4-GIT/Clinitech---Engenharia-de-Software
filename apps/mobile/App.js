@@ -15,6 +15,12 @@ import SolicitarExame from "./components/SolicitarExame";
 import CadastrarConvenio from "./components/CadastrarConvenio";
 import AtualizarConvenio from "./components/AtualizarConvenio";
 
+import InserirConsulta from "./components/InserirConsulta";
+import AgendarConsulta from "./components/AgendarConsulta";
+import CancelarConsulta from "./components/CancelarConsulta";
+import VisualizarConsulta from "./components/VisualizarConsulta";
+import EscolherHorario from "./components/EscolherHorario";
+
 export default function App() {
   const [screen, setScreen] = useState("cadastrarConvenio");
   const [user, setUser] = useState(null);
@@ -22,6 +28,8 @@ export default function App() {
 
   const [examCpf, setExamCpf] = useState(null);
   const [examPaciente, setExamPaciente] = useState(null);
+
+  const [medicoFiltrar, setMedicoFiltrar] = useState(null);
 
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
@@ -87,6 +95,7 @@ export default function App() {
           }}
           onGoBuscarExames={() => setScreen("buscarExames")}
           onGoCadastrarConvenio={() => setScreen("cadastrarConvenio")}
+          onGoInserirConsulta={() => setScreen("inserirConsulta")}
         />
       )}
 
@@ -135,6 +144,43 @@ export default function App() {
           onSaved={() => setScreen("homeUsuario")}
         />
       )}
+
+      {screen === "inserirConsulta" && (
+       <InserirConsulta
+          onVoltar={() => setScreen("homeUsuario")}
+          onSetScreen={setScreen}
+       />
+      )}
+
+      {screen === "agendarConsulta" && (
+        <AgendarConsulta 
+          onVoltar={() => setScreen("inserirConsulta")}
+          onContinuar={(medicoSelecionado) => {
+            setMedicoFiltrar(medicoSelecionado);
+            setScreen("escolherHorario");       
+          }}        
+        />
+      )}
+
+
+      {screen === "cancelarConsulta" && (
+        <CancelarConsulta 
+        onVoltar={() => setScreen("inserirConsulta")} 
+        />
+      )}
+
+      {screen === "visualizarConsulta" && (
+        <VisualizarConsulta 
+        onVoltar={() => setScreen("inserirConsulta")} 
+        />
+      )}
+
+      {screen === "escolherHorario" && (
+        <EscolherHorario
+          onVoltar={() => setScreen("agendarConsulta")}
+          medicoFiltrar={medicoFiltrar}
+        />
+)}
 
       <StatusBar style="light" />
     </View>
