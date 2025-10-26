@@ -6,19 +6,17 @@ import { Ionicons } from "@expo/vector-icons";
 // Horários fixos
 const HORARIOS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
 
-export default function EscolherHorario({ onVoltar, consulta, onVoltarParaInserirConsulta }) {
+export default function EscolherHorario({ onVoltar, consulta, onVoltarParaInserirConsulta, onConsultaConfirmada }) {
   const objConsulta = consulta || {};
   const { especialidade, localidade, medicoFiltrar, listaMedicos } = objConsulta;
 
   const [diaSelecionado, setDiaSelecionado] = useState(null);
   const [horarioSelecionado, setHorarioSelecionado] = useState(null);
 
-  // Estado para mês/ano do calendário
   const hoje = new Date();
-  const [mesAtual, setMesAtual] = useState(hoje.getMonth()); // 0 a 11
+  const [mesAtual, setMesAtual] = useState(hoje.getMonth());
   const [anoAtual, setAnoAtual] = useState(hoje.getFullYear());
 
-  // Gera array de dias do mês
   const gerarDiasDoMes = (mes, ano) => {
     const numDias = new Date(ano, mes + 1, 0).getDate();
     return Array.from({ length: numDias }, (_, i) => i + 1);
@@ -26,22 +24,46 @@ export default function EscolherHorario({ onVoltar, consulta, onVoltarParaInseri
   const diasDoMes = gerarDiasDoMes(mesAtual, anoAtual);
 
   const confirmarConsulta = () => {
-    if (!diaSelecionado || !horarioSelecionado) return;
+  if (!diaSelecionado || !horarioSelecionado) return;
 
-    const medicoEscolhido =
-      medicoFiltrar && medicoFiltrar !== "Todos"
-        ? medicoFiltrar
-        : (listaMedicos || []).filter(m => m !== "Todos")[Math.floor(Math.random() * ((listaMedicos || []).length - 1))];
+  const medicoEscolhido =
+    medicoFiltrar && medicoFiltrar !== "Todos"
+      ? medicoFiltrar
+      : (listaMedicos || []).filter(m => m !== "Todos")[Math.floor(Math.random() * ((listaMedicos || []).length - 1))];
 
-    const mensagem = `Sua consulta em ${especialidade} foi agendada com sucesso para ${diaSelecionado}/${mesAtual + 1}/${anoAtual} às ${horarioSelecionado}, com ${medicoEscolhido}.\nComparecer com 15 minutos de antecedência no ${localidade}.`;
-
-    if (typeof window !== "undefined") {
-      window.alert(mensagem);
-      onVoltarParaInserirConsulta?.();
-    } else {
-      Alert.alert("Consulta agendada!", mensagem, [{ text: "OK", onPress: () => onVoltarParaInserirConsulta?.() }]);
-    }
+  const novaConsulta = {
+    especialidade,
+    localidade,
+    medico: medicoEscolhido,
+    dia: diaSelecionado,
+    mes: mesAtual + 1,
+    ano: anoAtual,
+    horario: horarioSelecionado,
   };
+
+  const mensagem = `Sua consulta em ${especialidade} foi agendada com sucesso para ${diaSelecionado}/${mesAtual + 1}/${anoAtual} às ${horarioSelecionado}, com ${medicoEscolhido}.
+Comparecer com 15 minutos de antecedência no ${localidade}.`;
+
+  // Ambiente Web
+  if (typeof window !== "undefined") {
+    window.alert(mensagem);
+    onConsultaConfirmada?.(novaConsulta); // <-- Salva a consulta
+    onVoltarParaInserirConsulta?.(); // volta ao menu principal ou para outra tela
+  } else {
+    // Ambiente mobile
+    Alert.alert("Consulta agendada!", mensagem, [
+      {
+        text: "OK",
+        onPress: () => {
+          onConsultaConfirmada?.(novaConsulta);
+          onVoltarParaInserirConsulta?.();
+        },
+      },
+    ]);
+  }
+};
+
+
 
   const irMesAnterior = () => {
     if (mesAtual === 0) {

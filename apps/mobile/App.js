@@ -29,8 +29,8 @@ export default function App() {
   const [examCpf, setExamCpf] = useState(null);
   const [examPaciente, setExamPaciente] = useState(null);
 
-  const [medicoFiltrar, setMedicoFiltrar] = useState(null);
   const [consultaAgendada, setConsultaAgendada] = useState(null);
+  const [consultas, setConsultas] = useState([]);
 
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
@@ -171,7 +171,8 @@ export default function App() {
       )}
 
       {screen === "visualizarConsulta" && (
-        <VisualizarConsulta 
+        <VisualizarConsulta
+        consultas={consultas}
         onVoltar={() => setScreen("inserirConsulta")} 
         />
       )}
@@ -179,8 +180,12 @@ export default function App() {
       {screen === "escolherHorario" && (
         <EscolherHorario
           onVoltar={() => setScreen("agendarConsulta")}
-          onVoltarParaInserirConsulta={() => setScreen("inserirConsulta")}
           consulta={consultaAgendada}
+          onVoltarParaInserirConsulta={() => setScreen("inserirConsulta")}
+          onConsultaConfirmada={(novaConsulta) => {
+            setConsultas(prev => [...consultas, novaConsulta]);
+            setScreen("visualizarConsulta");
+          }}
         />
 )}
 
