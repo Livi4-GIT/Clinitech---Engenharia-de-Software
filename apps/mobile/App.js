@@ -21,8 +21,11 @@ import CancelarConsulta from "./components/CancelarConsulta";
 import VisualizarConsulta from "./components/VisualizarConsulta";
 import EscolherHorario from "./components/EscolherHorario";
 
+
+import PacienteExames from "./components/PacienteExames";
+
 export default function App() {
-  const [screen, setScreen] = useState("cadastrarConvenio");
+  const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
 
@@ -96,6 +99,8 @@ export default function App() {
           onGoBuscarExames={() => setScreen("buscarExames")}
           onGoCadastrarConvenio={() => setScreen("cadastrarConvenio")}
           onGoInserirConsulta={() => setScreen("inserirConsulta")}
+          // NOVO: callback para o botão "Exames"
+          onGoPacienteExames={() => setScreen("pacienteExames")}
         />
       )}
 
@@ -146,33 +151,28 @@ export default function App() {
       )}
 
       {screen === "inserirConsulta" && (
-       <InserirConsulta
+        <InserirConsulta
           onVoltar={() => setScreen("homeUsuario")}
           onSetScreen={setScreen}
-       />
+        />
       )}
 
       {screen === "agendarConsulta" && (
-        <AgendarConsulta 
+        <AgendarConsulta
           onVoltar={() => setScreen("inserirConsulta")}
           onContinuar={(medicoSelecionado) => {
             setMedicoFiltrar(medicoSelecionado);
-            setScreen("escolherHorario");       
-          }}        
+            setScreen("escolherHorario");
+          }}
         />
       )}
 
-
       {screen === "cancelarConsulta" && (
-        <CancelarConsulta 
-        onVoltar={() => setScreen("inserirConsulta")} 
-        />
+        <CancelarConsulta onVoltar={() => setScreen("inserirConsulta")} />
       )}
 
       {screen === "visualizarConsulta" && (
-        <VisualizarConsulta 
-        onVoltar={() => setScreen("inserirConsulta")} 
-        />
+        <VisualizarConsulta onVoltar={() => setScreen("inserirConsulta")} />
       )}
 
       {screen === "escolherHorario" && (
@@ -180,7 +180,12 @@ export default function App() {
           onVoltar={() => setScreen("agendarConsulta")}
           medicoFiltrar={medicoFiltrar}
         />
-)}
+      )}
+
+    
+      {screen === "pacienteExames" && (
+        <PacienteExames onVoltar={() => setScreen("homeUsuario")} />
+      )}
 
       <StatusBar style="light" />
     </View>
