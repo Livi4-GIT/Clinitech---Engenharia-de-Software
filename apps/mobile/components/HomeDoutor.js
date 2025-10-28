@@ -10,6 +10,7 @@ export default function HomeDoutor({
   medico,
   onLogout,
   onGoBuscarExames,
+  onGoChat
 }) {
   const nome = (medico?.nome || 'Ciclano').trim();
 
@@ -66,7 +67,12 @@ export default function HomeDoutor({
           </View>
 
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox}>
+            <TouchableOpacity
+              style={styles.iconBox}
+              onPress={onGoChat}
+              accessibilityRole="button"
+              accessibilityLabel="Ir para chat com médico"
+            >
               <Ionicons name="chatbubble-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Comunicação</Text>
             </TouchableOpacity>

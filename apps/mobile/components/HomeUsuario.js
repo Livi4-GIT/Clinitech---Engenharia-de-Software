@@ -12,6 +12,7 @@ export default function HomeScreen({
   onGoCadastrarConvenio,
   onGoInserirConsulta,
   onGoPacienteExames,
+  onGoChat,
 }) {
   const nome = (user?.nome || 'Fulano').trim();
 
@@ -86,7 +87,7 @@ export default function HomeScreen({
           </View>
 
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox}>
+            <TouchableOpacity style={styles.iconBox} onPress={() => onGoChat?.() }>
               <Ionicons name="chatbubble-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Comunicação</Text>
             </TouchableOpacity>

@@ -10,6 +10,8 @@ import CadastroMedico from "./components/CadastroMedico";
 
 import HomeUsuario from "./components/HomeUsuario";
 import HomeDoutor from "./components/HomeDoutor";
+import ChatMedico from "./components/ChatMedico";
+import ListaPacientes from "./components/ListaPacientes";
 import BuscarExamesCPF from "./components/BuscarExamesCPF";
 import SolicitarExame from "./components/SolicitarExame";
 import CadastrarConvenio from "./components/CadastrarConvenio";
@@ -204,6 +206,28 @@ export default function App() {
         <PacienteExames
           cpf={user?.cpf}
           onVoltar={() => setScreen("homeUsuario")}
+        />
+      )}
+
+      {screen === "chatMedico" && (
+        <ChatMedico
+          medicoId={chatParams?.medicoId ?? medico?.crm}
+          pacienteId={chatParams?.pacienteId ?? user?.cpf}
+          role={chatParams?.role ?? (medico ? 'medico' : user ? 'paciente' : undefined)}
+          onVoltar={() => {
+            setChatParams(null);
+            setScreen(medico ? "homeDoutor" : user ? "homeUsuario" : "login");
+          }}
+        />
+      )}
+
+      {screen === 'listaPacientes' && (
+        <ListaPacientes
+          onVoltar={() => setScreen('homeDoutor')}
+          onSelect={(paciente) => {
+            setChatParams({ medicoId: medico?.crm, pacienteId: paciente.cpf, role: 'medico' });
+            setScreen('chatMedico');
+          }}
         />
       )}
 
