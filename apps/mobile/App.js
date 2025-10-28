@@ -21,8 +21,8 @@ import CancelarConsulta from "./components/CancelarConsulta";
 import VisualizarConsulta from "./components/VisualizarConsulta";
 import EscolherHorario from "./components/EscolherHorario";
 
-
 import PacienteExames from "./components/PacienteExames";
+import VisualizarExame from "./components/VisualizarExame"; 
 
 export default function App() {
   const [screen, setScreen] = useState("login");
@@ -55,7 +55,10 @@ export default function App() {
         <>
           <CadastroUsuario onAfterSave={() => setScreen("login")} />
           <View style={styles.overlayTop}>
-            <Pressable style={styles.backBtn} onPress={() => setScreen("login")}>
+            <Pressable
+              style={styles.backBtn}
+              onPress={() => setScreen("login")}
+            >
               <Text style={styles.backTxt}>Já tenho conta</Text>
             </Pressable>
           </View>
@@ -99,7 +102,6 @@ export default function App() {
           onGoBuscarExames={() => setScreen("buscarExames")}
           onGoCadastrarConvenio={() => setScreen("cadastrarConvenio")}
           onGoInserirConsulta={() => setScreen("inserirConsulta")}
-          // NOVO: callback para o botão "Exames"
           onGoPacienteExames={() => setScreen("pacienteExames")}
         />
       )}
@@ -115,14 +117,30 @@ export default function App() {
         />
       )}
 
+     
       {screen === "buscarExames" && (
         <BuscarExamesCPF
-          onVoltar={() => setScreen(user ? "homeUsuario" : medico ? "homeDoutor" : "login")}
+          onVoltar={() =>
+            setScreen(user ? "homeUsuario" : medico ? "homeDoutor" : "login")
+          }
           onSolicitarExame={({ cpf, paciente }) => {
             setExamCpf(cpf);
             setExamPaciente(paciente);
             setScreen("solicitarExame");
           }}
+          onVisualizarExame={(exame) => {
+           
+            setExamPaciente(exame);
+            setScreen("visualizarExame");
+          }}
+        />
+      )}
+
+     
+      {screen === "visualizarExame" && (
+        <VisualizarExame
+          exame={examPaciente}
+          onVoltar={() => setScreen("buscarExames")}
         />
       )}
 
@@ -182,9 +200,11 @@ export default function App() {
         />
       )}
 
-    
       {screen === "pacienteExames" && (
-        <PacienteExames onVoltar={() => setScreen("homeUsuario")} />
+        <PacienteExames
+          cpf={user?.cpf}
+          onVoltar={() => setScreen("homeUsuario")}
+        />
       )}
 
       <StatusBar style="light" />
