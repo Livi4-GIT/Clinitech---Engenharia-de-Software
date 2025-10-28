@@ -184,8 +184,11 @@ export default function App() {
 
     
       {screen === "pacienteExames" && (
-        <PacienteExames onVoltar={() => setScreen("homeUsuario")} />
-      )}
+        <PacienteExames
+          cpf={user?.cpf}     
+          onVoltar={() => setScreen("homeUsuario")}
+        />
+)}
 
       <StatusBar style="light" />
     </View>
