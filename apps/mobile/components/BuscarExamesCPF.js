@@ -27,6 +27,7 @@ export default class BuscarExamesCPF extends React.Component {
     };
   }
 
+  // ===== Helpers de CPF =====
   somenteDigitos = (v) => (v || "").replace(/\D+/g, "");
   formatarCPF = (v) => {
     const d = this.somenteDigitos(v).slice(0, 11);
@@ -55,6 +56,7 @@ export default class BuscarExamesCPF extends React.Component {
     return dv2 === parseInt(s[10], 10);
   };
 
+  // ===== Status helpers =====
   isPendente = (status) => {
     const s = String(status || "").toLowerCase();
     return (
@@ -74,6 +76,16 @@ export default class BuscarExamesCPF extends React.Component {
       s.includes("ok")
     );
   };
+  isEstadoTerminalRuim = (status) => {
+    const s = String(status || "").toLowerCase();
+    return (
+      s.includes("recus") ||
+      s.includes("rejei") ||
+      s.includes("cancel") ||
+      s.includes("erro") ||
+      s.includes("falh")
+    );
+  };
 
   statusIcon = (status) => {
     const s = String(status || "").toLowerCase();
@@ -81,14 +93,7 @@ export default class BuscarExamesCPF extends React.Component {
     if (s.includes("aceit") || s.includes("confirm"))
       return "check-circle-outline";
     if (this.isLiberado(s)) return "check-decagram";
-    if (
-      s.includes("recus") ||
-      s.includes("rejei") ||
-      s.includes("cancel") ||
-      s.includes("erro") ||
-      s.includes("falh")
-    )
-      return "alert-circle";
+    if (this.isEstadoTerminalRuim(s)) return "alert-circle";
     return "file-document";
   };
 
@@ -109,13 +114,7 @@ export default class BuscarExamesCPF extends React.Component {
         bg: "rgba(75,192,192,0.15)",
         border: "rgba(75,192,192,0.45)",
       };
-    if (
-      s.includes("recus") ||
-      s.includes("rejei") ||
-      s.includes("cancel") ||
-      s.includes("erro") ||
-      s.includes("falh")
-    )
+    if (this.isEstadoTerminalRuim(s))
       return {
         bg: "rgba(255,99,132,0.15)",
         border: "rgba(255,99,132,0.45)",
@@ -124,6 +123,40 @@ export default class BuscarExamesCPF extends React.Component {
       bg: "rgba(214,228,255,0.12)",
       border: "rgba(214,228,255,0.28)",
     };
+  };
+
+  // ===== Datas =====
+  parseDate = (str) => {
+    if (!str || typeof str !== "string") return null;
+    const s = str.trim();
+
+    // ISO / YYYY-MM-DD
+    const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+      const d = new Date(`${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}T00:00:00`);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // DD/MM/YYYY
+    const brMatch = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (brMatch) {
+      const d = new Date(`${brMatch[3]}-${brMatch[2]}-${brMatch[1]}T00:00:00`);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // Fallback: tentar Date direto
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
+  isPastDay = (dateLike) => {
+    const d = dateLike instanceof Date ? dateLike : this.parseDate(dateLike);
+    if (!d) return false;
+    const today = new Date();
+    // Zerar horas
+    d.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return d.getTime() < today.getTime();
   };
 
   // 🔍 Buscar exames e dados do paciente
@@ -146,15 +179,30 @@ export default class BuscarExamesCPF extends React.Component {
       const exames = examesStr ? JSON.parse(examesStr) : [];
 
       const examesNormalizados = Array.isArray(exames)
-        ? exames.map((e) => ({
-            id: e.id || Date.now() + Math.random(),
-            tipo: e.tipo || "Exame",
-            dataColeta: e.dataColeta || "—",
-            status: e.status || (e.resultadoPdfUri ? "Liberado" : "Pendente"),
-            observacao: e.observacao || "",
-            resultadoPdfUri: e.resultadoPdfUri || null,
-            resultadoPdfNome: e.resultadoPdfNome || null,
-          }))
+        ? exames.map((e) => {
+            const dataColeta = e.dataColeta || "—";
+            // status base
+            let statusBase = e.status || (e.resultadoPdfUri ? "Liberado" : "Pendente");
+
+            // Se a data de coleta já passou e não é liberado nem estado terminal, marcar como Realizado
+            if (
+              this.isPastDay(dataColeta) &&
+              !this.isLiberado(statusBase) &&
+              !this.isEstadoTerminalRuim(statusBase)
+            ) {
+              statusBase = "Realizado";
+            }
+
+            return {
+              id: e.id || Date.now() + Math.random(),
+              tipo: e.tipo || "Exame",
+              dataColeta,
+              status: statusBase,
+              observacao: e.observacao || "",
+              resultadoPdfUri: e.resultadoPdfUri || null,
+              resultadoPdfNome: e.resultadoPdfNome || null,
+            };
+          })
         : [];
 
       this.setState({
@@ -190,6 +238,21 @@ export default class BuscarExamesCPF extends React.Component {
       this.props.onVisualizarExame(exame);
     } else {
       Alert.alert("Visualizar exame", "Abrir tela VisualizarExame.js");
+    }
+  };
+
+  // ➕ Solicitar exame (volta o botão)
+  handleSolicitarExame = () => {
+    const { paciente, cpf } = this.state;
+    if (!paciente) return;
+    const cpfN = this.somenteDigitos(paciente?.cpf || cpf);
+    if (cpfN.length !== 11) {
+      return Alert.alert("CPF inválido", "Informe/valide o CPF do paciente.");
+    }
+    if (this.props.onSolicitarExame) {
+      this.props.onSolicitarExame({ cpf: cpfN, paciente });
+    } else {
+      Alert.alert("Ação", `Navegar para tela de solicitação de exame (CPF ${cpfN}).`);
     }
   };
 
@@ -313,6 +376,25 @@ export default class BuscarExamesCPF extends React.Component {
               </View>
             );
           })
+        )}
+
+        {/* ➕ Botão "Solicitar exame para esse CPF" (mostra quando há paciente) */}
+        {paciente && (
+          <LinearGradient
+            colors={["#2f6edb", "#1f4fb6"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.btn, { marginTop: 16 }]}
+          >
+            <Pressable
+              onPress={this.handleSolicitarExame}
+              style={styles.btnPress}
+              accessibilityRole="button"
+              accessibilityLabel="Solicitar exame para esse CPF"
+            >
+              <Text style={styles.btnText}>Solicitar exame para esse CPF</Text>
+            </Pressable>
+          </LinearGradient>
         )}
       </View>
     );
