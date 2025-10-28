@@ -15,8 +15,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy"; 
 import * as Sharing from "expo-sharing";
+
 
 export default class PacienteExames extends React.Component {
   constructor(props) {
@@ -101,7 +102,6 @@ export default class PacienteExames extends React.Component {
     return { bg: "rgba(214,228,255,0.12)", border: "rgba(214,228,255,0.28)" };
   };
 
-  // pode anexar PDF se a data já passou (ou hoje) e ainda não há PDF salvo
   podeAnexar = (ex) => this.jaPassou(ex?.dataColeta) && !ex?.resultadoPdfUri;
 
   buscar = async (auto = false) => {
@@ -144,7 +144,7 @@ export default class PacienteExames extends React.Component {
     }
   };
 
-  // === anexar PDF ===
+  // === anexar PDF corrigido e persistente ===
   anexarPdf = async (exame) => {
     try {
       const cpfN = this.somenteDigitos(this.state.cpf);
@@ -156,29 +156,30 @@ export default class PacienteExames extends React.Component {
 
       const pick = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
-        multiple: false,
         copyToCacheDirectory: true,
       });
+
       if (pick.canceled) {
         this.setState({ anexandoId: null });
         return;
       }
 
       const file = pick.assets?.[0];
-      if (!file || !file.uri) {
+      if (!file?.uri) {
         this.setState({ anexandoId: null });
-        return Alert.alert("Erro", "Não foi possível selecionar o arquivo.");
+        return Alert.alert("Erro", "Arquivo inválido.");
       }
 
+      // cria diretório fixo do paciente
       const baseDir = `${FileSystem.documentDirectory}exames/${cpfN}`;
-      const dirInfo = await FileSystem.getInfoAsync(baseDir);
-      if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(baseDir, { intermediates: true });
-      }
+      await FileSystem.makeDirectoryAsync(baseDir, { intermediates: true });
 
-      const destPath = `${baseDir}/${exame.id || Date.now()}.pdf`;
+      const fileName = `${exame.id || Date.now()}.pdf`;
+      const destPath = `${baseDir}/${fileName}`;
+
       await FileSystem.copyAsync({ from: file.uri, to: destPath });
 
+      // salva no AsyncStorage
       const key = `EXA_${cpfN}`;
       const listaStr = await AsyncStorage.getItem(key);
       const lista = listaStr ? JSON.parse(listaStr) : [];
@@ -188,7 +189,7 @@ export default class PacienteExames extends React.Component {
           ? {
               ...e,
               resultadoPdfUri: destPath,
-              resultadoPdfNome: file.name || "resultado.pdf",
+              resultadoPdfNome: file.name || fileName,
               resultadoPdfData: new Date().toISOString(),
             }
           : e
@@ -196,24 +197,26 @@ export default class PacienteExames extends React.Component {
 
       await AsyncStorage.setItem(key, JSON.stringify(novaLista));
 
-      this.setState({
-        exames: this.state.exames.map((e) =>
+      // atualiza na tela também
+      this.setState((prev) => ({
+        exames: prev.exames.map((e) =>
           (e.id || e.tipo) === (exame.id || exame.tipo)
             ? {
                 ...e,
                 resultadoPdfUri: destPath,
-                resultadoPdfNome: file.name || "resultado.pdf",
+                resultadoPdfNome: file.name || fileName,
                 resultadoPdfData: new Date().toISOString(),
               }
             : e
         ),
         anexandoId: null,
-      });
+      }));
 
-      Alert.alert("OK", "PDF anexado ao exame.");
+      Alert.alert("Sucesso", "PDF anexado e salvo com sucesso!");
     } catch (err) {
+      console.error(err);
       this.setState({ anexandoId: null });
-      Alert.alert("Erro", "Não foi possível anexar o PDF.");
+      Alert.alert("Erro", "Falha ao anexar o PDF.");
     }
   };
 
@@ -291,16 +294,8 @@ export default class PacienteExames extends React.Component {
                   </View>
                 </View>
 
-                {(ex.observacao || ex.resultado) ? (
-                  <View style={[styles.examRow, { alignItems: "flex-start" }]}>
-                    <Text style={styles.examLabel}>Observação:</Text>
-                    <Text style={[styles.examValue, { flex: 1 }]}>{ex.observacao || ex.resultado}</Text>
-                  </View>
-                ) : null}
-
                 {/* Ações */}
                 <View style={{ marginTop: 10 }}>
-                  {/* Laudo / estado */}
                   <LinearGradient
                     colors={["#2f6edb", "#1f4fb6"]}
                     start={{ x: 0, y: 0 }}
@@ -319,7 +314,7 @@ export default class PacienteExames extends React.Component {
                     </Pressable>
                   </LinearGradient>
 
-                  {/* Anexar PDF (se data passou e não tem PDF) */}
+                  {/* Anexar PDF */}
                   {podeAnexar && (
                     <LinearGradient
                       colors={["#2f6edb", "#1f4fb6"]}
@@ -346,7 +341,7 @@ export default class PacienteExames extends React.Component {
                     </LinearGradient>
                   )}
 
-                  {/* Ver/Compartilhar PDF (se houver) */}
+                  {/* PDF existente */}
                   {temPdf && (
                     <Pressable
                       onPress={() => this.abrirOuCompartilharPdf(ex)}
@@ -426,7 +421,6 @@ export default class PacienteExames extends React.Component {
 
 const styles = StyleSheet.create({
   center: { flexGrow: 1, padding: 20, paddingBottom: 20 },
-
   topRight: { position: "absolute", top: 50, right: 20, zIndex: 10 },
   topRightBtn: {
     flexDirection: "row",
@@ -439,7 +433,6 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.25)",
   },
   topRightTxt: { color: "#fff", fontWeight: "800", marginLeft: 8 },
-
   card: {
     borderRadius: 28,
     marginTop: 100,
@@ -449,7 +442,6 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.18)",
   },
   title: { color: "#eaf1ff", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 16 },
-
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
@@ -459,16 +451,13 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   input: { flex: 1, height: 40, color: "#eaf1ff" },
-
   btn: { marginTop: 12, borderRadius: 14, overflow: "hidden" },
   btnPress: { paddingVertical: 14, alignItems: "center" },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
   link: { color: "#cdd9ff", textAlign: "center", fontWeight: "600" },
-
   section: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: "rgba(214,228,255,0.18)" },
   sectionTitle: { color: "#eaf1ff", fontSize: 18, fontWeight: "700", marginBottom: 8 },
   emptyTxt: { color: "#cdd9ff", fontStyle: "italic" },
-
   examCard: {
     marginTop: 10,
     padding: 12,
@@ -481,14 +470,11 @@ const styles = StyleSheet.create({
   examRow: { flexDirection: "row", alignItems: "center", marginTop: 4 },
   examLabel: { color: "#cdd9ff", width: 110 },
   examValue: { color: "#eaf1ff", fontWeight: "600" },
-
   chip: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, borderWidth: 1 },
   chipTxt: { color: "#eaf1ff", fontWeight: "700", fontSize: 12 },
-
   viewBtn: { borderRadius: 12, overflow: "hidden" },
   viewPress: { paddingVertical: 8, paddingHorizontal: 12, flexDirection: "row", alignItems: "center" },
   viewBtnTxt: { color: "#fff", fontWeight: "800" },
-
   pdfBtn: {
     marginTop: 8,
     flexDirection: "row",
