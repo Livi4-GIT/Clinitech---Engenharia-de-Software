@@ -87,7 +87,11 @@ export default function HomeScreen({
           </View>
 
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox} onPress={() => onGoChat?.() }>
+            <TouchableOpacity style={styles.iconBox} onPress={() => {
+              if (typeof onGoChat === 'function') {
+                onGoChat();
+              }
+            }}>
               <Ionicons name="chatbubble-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Comunicação</Text>
             </TouchableOpacity>

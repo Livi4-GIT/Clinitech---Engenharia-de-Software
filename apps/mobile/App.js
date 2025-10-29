@@ -35,6 +35,7 @@ export default function App() {
   const [examPaciente, setExamPaciente] = useState(null);
 
   const [medicoFiltrar, setMedicoFiltrar] = useState(null);
+  const [chatParams, setChatParams] = useState(null);
 
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
@@ -105,6 +106,10 @@ export default function App() {
           onGoCadastrarConvenio={() => setScreen("cadastrarConvenio")}
           onGoInserirConsulta={() => setScreen("inserirConsulta")}
           onGoPacienteExames={() => setScreen("pacienteExames")}
+          onGoChat={() => {
+            setChatParams({ pacienteId: user?.cpf, role: 'paciente' });
+            setScreen('chatMedico');
+          }}
         />
       )}
 
@@ -113,9 +118,10 @@ export default function App() {
           medico={medico}
           onLogout={() => {
             setMedico(null);
-            setScreen("loginMedico");
+            setScreen("login");
           }}
           onGoBuscarExames={() => setScreen("buscarExames")}
+          onGoChat={() => setScreen("listaPacientes")}
         />
       )}
 
