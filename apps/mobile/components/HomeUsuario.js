@@ -13,10 +13,11 @@ export default function HomeScreen({
   onGoInserirConsulta,
   onGoPacienteExames,
   onGoChat,
+  onGoReceitas, // 👈 nova prop
 }) {
   const nome = (user?.nome || 'Fulano').trim();
 
-  
+  // Normalização do gênero
   const generoRaw = (user?.genero ?? '')
     .toString()
     .normalize('NFD')
@@ -24,7 +25,6 @@ export default function HomeScreen({
     .toLowerCase()
     .trim();
 
- 
   const isFeminino = generoRaw.startsWith('fem') || generoRaw.includes('mulher');
   const isMasculino = generoRaw.startsWith('masc') || generoRaw.includes('homem');
 
@@ -35,25 +35,23 @@ export default function HomeScreen({
     : 'Seja Bem-Vindo(a)';
 
   const abrirCadastrarConvenio = () => {
-    if (navigation?.navigate) {
-      navigation.navigate('CadastrarConvenio');
-    } else if (typeof onGoCadastrarConvenio === 'function') {
-      onGoCadastrarConvenio();
-    }
+    if (navigation?.navigate) navigation.navigate('CadastrarConvenio');
+    else if (typeof onGoCadastrarConvenio === 'function') onGoCadastrarConvenio();
   };
 
   const abrirInserirConsultas = () => {
-    if (typeof onGoInserirConsulta === 'function') {
-      onGoInserirConsulta();
-    }
+    if (typeof onGoInserirConsulta === 'function') onGoInserirConsulta();
   };
 
   const abrirPacienteExames = () => {
-    if (navigation?.navigate) {
-      navigation.navigate('PacienteExames');
-    } else if (typeof onGoPacienteExames === 'function') {
-      onGoPacienteExames();
-    }
+    if (navigation?.navigate) navigation.navigate('PacienteExames');
+    else if (typeof onGoPacienteExames === 'function') onGoPacienteExames();
+  };
+
+  // 👇 novo handler Receitas
+  const abrirReceitas = () => {
+    if (navigation?.navigate) navigation.navigate('PacienteReceitas');
+    else if (typeof onGoReceitas === 'function') onGoReceitas();
   };
 
   return (
@@ -81,17 +79,13 @@ export default function HomeScreen({
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.iconBox} onPress={abrirCadastrarConvenio}>
-              <Ionicons name="search-outline" size={42} color="#eaf1ff" />
+              <Ionicons name="card-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Cadastrar Convênio</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox} onPress={() => {
-              if (typeof onGoChat === 'function') {
-                onGoChat();
-              }
-            }}>
+            <TouchableOpacity style={styles.iconBox} onPress={() => { if (typeof onGoChat === 'function') onGoChat(); }}>
               <Ionicons name="chatbubble-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Comunicação</Text>
             </TouchableOpacity>
@@ -100,6 +94,17 @@ export default function HomeScreen({
               <MaterialCommunityIcons name="microscope" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Exames</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* 👇 Nova linha com o botão Receitas */}
+          <View style={styles.row}>
+            <TouchableOpacity style={styles.iconBox} onPress={abrirReceitas}>
+              <MaterialCommunityIcons name="receipt-text-outline" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Receitas</Text>
+            </TouchableOpacity>
+
+            {/* Espaço para manter o grid 2 colunas */}
+            <View style={[styles.iconBox, { opacity: 0 }]} pointerEvents="none" />
           </View>
         </View>
 
@@ -143,23 +148,58 @@ export default function HomeScreen({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
   header: {
-    paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row',
-    alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
+
   headerText: { color: '#eaf1ff', fontSize: 20, fontWeight: '700' },
+
   profileCircle: {
-    width: 48, height: 48, borderRadius: 24, borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.7)', backgroundColor: 'rgba(255,255,255,0.9)',
-    justifyContent: 'center', alignItems: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+
   grid: { marginTop: 24, alignItems: 'center', paddingHorizontal: 16 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 16 },
-  iconBox: {
-    width: '48%', height: 130, borderRadius: 20, borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.18)', backgroundColor: 'rgba(255,255,255,0.10)',
-    justifyContent: 'center', alignItems: 'center', padding: 12,
-    shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 20, shadowOffset: { width: 0, height: 10 },
+
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 16,
   },
-  label: { marginTop: 10, fontSize: 14, color: '#eaf1ff', textAlign: 'center', fontWeight: '600' },
+
+  iconBox: {
+    width: '48%',
+    height: 130,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+  },
+
+  label: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#eaf1ff',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
 });

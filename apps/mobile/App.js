@@ -24,7 +24,13 @@ import VisualizarConsulta from "./components/VisualizarConsulta";
 import EscolherHorario from "./components/EscolherHorario";
 
 import PacienteExames from "./components/PacienteExames";
-import VisualizarExame from "./components/VisualizarExame"; 
+import VisualizarExame from "./components/VisualizarExame";
+
+
+import BuscarReceitasCPF from "./components/BuscarReceitasCPF";
+import CriarReceitas from "./components/CriarReceitas";
+import PacienteReceitas from "./components/PacienteReceitas";
+import VisualizarReceita from "./components/VisualizarReceita"; 
 
 export default function App() {
   const [screen, setScreen] = useState("login");
@@ -33,6 +39,10 @@ export default function App() {
 
   const [examCpf, setExamCpf] = useState(null);
   const [examPaciente, setExamPaciente] = useState(null);
+
+  const [receitaCpf, setReceitaCpf] = useState(null);
+  const [receitaPaciente, setReceitaPaciente] = useState(null);
+  const [receitaSelecionada, setReceitaSelecionada] = useState(null); 
 
   const [medicoFiltrar, setMedicoFiltrar] = useState(null);
   const [chatParams, setChatParams] = useState(null);
@@ -58,10 +68,7 @@ export default function App() {
         <>
           <CadastroUsuario onAfterSave={() => setScreen("login")} />
           <View style={styles.overlayTop}>
-            <Pressable
-              style={styles.backBtn}
-              onPress={() => setScreen("login")}
-            >
+            <Pressable style={styles.backBtn} onPress={() => setScreen("login")}>
               <Text style={styles.backTxt}>Já tenho conta</Text>
             </Pressable>
           </View>
@@ -107,9 +114,11 @@ export default function App() {
           onGoInserirConsulta={() => setScreen("inserirConsulta")}
           onGoPacienteExames={() => setScreen("pacienteExames")}
           onGoChat={() => {
-            setChatParams({ pacienteId: user?.cpf, role: 'paciente' });
-            setScreen('chatMedico');
+            setChatParams({ pacienteId: user?.cpf, role: "paciente" });
+            setScreen("chatMedico");
           }}
+          
+          onGoReceitas={() => setScreen("pacienteReceitas")}
         />
       )}
 
@@ -122,10 +131,12 @@ export default function App() {
           }}
           onGoBuscarExames={() => setScreen("buscarExames")}
           onGoChat={() => setScreen("listaPacientes")}
+          
+          onGoReceitas={() => setScreen("buscarReceitas")}
         />
       )}
 
-     
+    
       {screen === "buscarExames" && (
         <BuscarExamesCPF
           onVoltar={() =>
@@ -137,14 +148,12 @@ export default function App() {
             setScreen("solicitarExame");
           }}
           onVisualizarExame={(exame) => {
-           
             setExamPaciente(exame);
             setScreen("visualizarExame");
           }}
         />
       )}
 
-     
       {screen === "visualizarExame" && (
         <VisualizarExame
           exame={examPaciente}
@@ -161,6 +170,7 @@ export default function App() {
         />
       )}
 
+    
       {screen === "cadastrarConvenio" && (
         <CadastrarConvenio
           onVoltar={() => setScreen("homeUsuario")}
@@ -176,6 +186,7 @@ export default function App() {
         />
       )}
 
+    
       {screen === "inserirConsulta" && (
         <InserirConsulta
           onVoltar={() => setScreen("homeUsuario")}
@@ -208,6 +219,7 @@ export default function App() {
         />
       )}
 
+    
       {screen === "pacienteExames" && (
         <PacienteExames
           cpf={user?.cpf}
@@ -215,11 +227,14 @@ export default function App() {
         />
       )}
 
+      
       {screen === "chatMedico" && (
         <ChatMedico
           medicoId={chatParams?.medicoId ?? medico?.crm}
           pacienteId={chatParams?.pacienteId ?? user?.cpf}
-          role={chatParams?.role ?? (medico ? 'medico' : user ? 'paciente' : undefined)}
+          role={
+            chatParams?.role ?? (medico ? "medico" : user ? "paciente" : undefined)
+          }
           onVoltar={() => {
             setChatParams(null);
             setScreen(medico ? "homeDoutor" : user ? "homeUsuario" : "login");
@@ -227,12 +242,65 @@ export default function App() {
         />
       )}
 
-      {screen === 'listaPacientes' && (
+      {screen === "listaPacientes" && (
         <ListaPacientes
-          onVoltar={() => setScreen('homeDoutor')}
+          onVoltar={() => setScreen("homeDoutor")}
           onSelect={(paciente) => {
-            setChatParams({ medicoId: medico?.crm, pacienteId: paciente.cpf, role: 'medico' });
-            setScreen('chatMedico');
+            setChatParams({
+              medicoId: medico?.crm,
+              pacienteId: paciente.cpf,
+              role: "medico",
+            });
+            setScreen("chatMedico");
+          }}
+        />
+      )}
+
+
+      {screen === "buscarReceitas" && (
+        <BuscarReceitasCPF
+          onVoltar={() => setScreen("homeDoutor")}
+          onCriarReceita={({ cpf, paciente }) => {
+            setReceitaCpf(cpf);
+            setReceitaPaciente(paciente);
+            setScreen("criarReceitas");
+          }}
+          onVisualizarPdf={(rec) => {
+            setReceitaSelecionada(rec);      
+            setScreen("visualizarReceita"); 
+          }}
+        />
+      )}
+
+      {screen === "criarReceitas" && (
+        <CriarReceitas
+          initialCpf={receitaCpf}
+          paciente={receitaPaciente}
+          onVoltar={() => setScreen("buscarReceitas")}
+          onSaved={() => setScreen("buscarReceitas")}
+        />
+      )}
+
+     
+      {screen === "pacienteReceitas" && (
+        <PacienteReceitas
+          cpf={user?.cpf}
+          onVoltar={() => setScreen("homeUsuario")}
+          onVisualizarPdf={(rec) => {
+            setReceitaSelecionada(rec);      
+            setScreen("visualizarReceita");  
+          }}
+        />
+      )}
+
+  
+      {screen === "visualizarReceita" && (
+        <VisualizarReceita
+          receita={receitaSelecionada}
+          onVoltar={() => {
+          
+            if (medico) setScreen("buscarReceitas");
+            else setScreen("pacienteReceitas");
           }}
         />
       )}
