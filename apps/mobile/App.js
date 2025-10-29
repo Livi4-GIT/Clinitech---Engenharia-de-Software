@@ -171,8 +171,8 @@ export default function App() {
 
       {screen === "atualizarConvenio" && (
         <AtualizarConvenio
-          onVoltar={() => setScreen("homeUsuario")}
-          onSaved={() => setScreen("homeUsuario")}
+          onVoltar={() => setScreen("cadastrarConvenio")}
+          onSaved={() => setScreen("cadastrarConvenio")}
         />
       )}
 
