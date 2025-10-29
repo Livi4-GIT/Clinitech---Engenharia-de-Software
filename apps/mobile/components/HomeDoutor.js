@@ -10,11 +10,12 @@ export default function HomeDoutor({
   medico,
   onLogout,
   onGoBuscarExames,
-  onGoChat
+  onGoChat,
+  onGoReceitas, 
 }) {
   const nome = (medico?.nome || 'Ciclano').trim();
 
-  // Normalização do gênero (mesma do HomeUsuario)
+  
   const generoRaw = (medico?.genero ?? '')
     .toString()
     .normalize('NFD')
@@ -34,6 +35,11 @@ export default function HomeDoutor({
   const abrirBuscarExames = () => {
     if (typeof onGoBuscarExames === 'function') onGoBuscarExames();
     else if (navigation?.navigate) navigation.navigate('BuscarExamesCPF');
+  };
+
+  const abrirReceitas = () => {
+    if (typeof onGoReceitas === 'function') onGoReceitas();
+    else if (navigation?.navigate) navigation.navigate('BuscarReceitasCPF');
   };
 
   return (
@@ -60,9 +66,15 @@ export default function HomeDoutor({
               <Text style={styles.label}>Agendamentos</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.iconBox}>
-              <Ionicons name="search-outline" size={42} color="#eaf1ff" />
-              <Text style={styles.label}>Buscar Paciente</Text>
+         
+            <TouchableOpacity
+              style={styles.iconBox}
+              onPress={abrirReceitas}
+              accessibilityRole="button"
+              accessibilityLabel="Ir para receitas (buscar por CPF)"
+            >
+              <MaterialCommunityIcons name="receipt-text-outline" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Receitas</Text>
             </TouchableOpacity>
           </View>
 
