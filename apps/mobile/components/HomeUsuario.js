@@ -13,11 +13,11 @@ export default function HomeScreen({
   onGoInserirConsulta,
   onGoPacienteExames,
   onGoChat,
-  onGoReceitas, // 👈 nova prop
+  onGoReceitas,
+  onGoAtestados, 
 }) {
   const nome = (user?.nome || 'Fulano').trim();
 
-  // Normalização do gênero
   const generoRaw = (user?.genero ?? '')
     .toString()
     .normalize('NFD')
@@ -28,11 +28,7 @@ export default function HomeScreen({
   const isFeminino = generoRaw.startsWith('fem') || generoRaw.includes('mulher');
   const isMasculino = generoRaw.startsWith('masc') || generoRaw.includes('homem');
 
-  const saudacao = isFeminino
-    ? 'Seja Bem-Vinda'
-    : isMasculino
-    ? 'Seja Bem-Vindo'
-    : 'Seja Bem-Vindo(a)';
+  const saudacao = isFeminino ? 'Seja Bem-Vinda' : isMasculino ? 'Seja Bem-Vindo' : 'Seja Bem-Vindo(a)';
 
   const abrirCadastrarConvenio = () => {
     if (navigation?.navigate) navigation.navigate('CadastrarConvenio');
@@ -48,10 +44,14 @@ export default function HomeScreen({
     else if (typeof onGoPacienteExames === 'function') onGoPacienteExames();
   };
 
-  // 👇 novo handler Receitas
   const abrirReceitas = () => {
     if (navigation?.navigate) navigation.navigate('PacienteReceitas');
     else if (typeof onGoReceitas === 'function') onGoReceitas();
+  };
+
+  const abrirAtestados = () => {
+    if (navigation?.navigate) navigation.navigate('PacienteAtestado');
+    else if (typeof onGoAtestados === 'function') onGoAtestados();
   };
 
   return (
@@ -96,15 +96,16 @@ export default function HomeScreen({
             </TouchableOpacity>
           </View>
 
-          {/* 👇 Nova linha com o botão Receitas */}
           <View style={styles.row}>
             <TouchableOpacity style={styles.iconBox} onPress={abrirReceitas}>
               <MaterialCommunityIcons name="receipt-text-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Receitas</Text>
             </TouchableOpacity>
 
-            {/* Espaço para manter o grid 2 colunas */}
-            <View style={[styles.iconBox, { opacity: 0 }]} pointerEvents="none" />
+            <TouchableOpacity style={styles.iconBox} onPress={abrirAtestados}>
+              <MaterialCommunityIcons name="clipboard-text-outline" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Atestados</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
