@@ -11,11 +11,11 @@ export default function HomeDoutor({
   onLogout,
   onGoBuscarExames,
   onGoChat,
-  onGoReceitas, 
+  onGoReceitas,
+  onGoAtestado, 
 }) {
   const nome = (medico?.nome || 'Ciclano').trim();
 
-  
   const generoRaw = (medico?.genero ?? '')
     .toString()
     .normalize('NFD')
@@ -42,6 +42,12 @@ export default function HomeDoutor({
     else if (navigation?.navigate) navigation.navigate('BuscarReceitasCPF');
   };
 
+  // <— NOVO
+  const abrirAtestado = () => {
+    if (typeof onGoAtestado === 'function') onGoAtestado();
+    else if (navigation?.navigate) navigation.navigate('Atestado');
+  };
+
   return (
     <LinearGradient
       colors={['#0a1a3f', '#0f2f6d', '#1c4fb8']}
@@ -66,7 +72,6 @@ export default function HomeDoutor({
               <Text style={styles.label}>Agendamentos</Text>
             </TouchableOpacity>
 
-         
             <TouchableOpacity
               style={styles.iconBox}
               onPress={abrirReceitas}
@@ -98,6 +103,22 @@ export default function HomeDoutor({
               <MaterialCommunityIcons name="microscope" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Exames</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* NOVO: linha com o botão Atestado */}
+          <View style={styles.row}>
+            <TouchableOpacity
+              style={styles.iconBox}
+              onPress={abrirAtestado}
+              accessibilityRole="button"
+              accessibilityLabel="Ir para emissão de atestado"
+            >
+              <MaterialCommunityIcons name="file-document-outline" size={42} color="#eaf1ff" />
+              <Text style={styles.label}>Atestado</Text>
+            </TouchableOpacity>
+
+            {/* Espaçador para manter a grade 2x2/2x1 visualmente consistente */}
+            <View style={{ width: '48%' }} />
           </View>
         </View>
 
@@ -141,7 +162,6 @@ export default function HomeDoutor({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-
   header: {
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -149,9 +169,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
   headerText: { color: '#eaf1ff', fontSize: 20, fontWeight: '700' },
-
   profileCircle: {
     width: 48,
     height: 48,
@@ -162,16 +180,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   grid: { marginTop: 24, alignItems: 'center', paddingHorizontal: 16 },
-
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 16,
   },
-
   iconBox: {
     width: '48%',
     height: 130,
@@ -187,7 +202,6 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 10 },
   },
-
   label: {
     marginTop: 10,
     fontSize: 14,

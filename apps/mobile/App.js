@@ -26,11 +26,12 @@ import EscolherHorario from "./components/EscolherHorario";
 import PacienteExames from "./components/PacienteExames";
 import VisualizarExame from "./components/VisualizarExame";
 
-
 import BuscarReceitasCPF from "./components/BuscarReceitasCPF";
 import CriarReceitas from "./components/CriarReceitas";
 import PacienteReceitas from "./components/PacienteReceitas";
 import VisualizarReceita from "./components/VisualizarReceita"; 
+
+import BuscarAtestadoCPF from "./components/BuscarAtestadoCPF";
 
 export default function App() {
   const [screen, setScreen] = useState("login");
@@ -43,6 +44,10 @@ export default function App() {
   const [receitaCpf, setReceitaCpf] = useState(null);
   const [receitaPaciente, setReceitaPaciente] = useState(null);
   const [receitaSelecionada, setReceitaSelecionada] = useState(null); 
+
+  const [atestadoCpf, setAtestadoCpf] = useState(null);
+  const [atestadoPaciente, setAtestadoPaciente] = useState(null);
+  const [atestadoSelecionado, setAtestadoSelecionado] = useState(null);
 
   const [medicoFiltrar, setMedicoFiltrar] = useState(null);
   const [chatParams, setChatParams] = useState(null);
@@ -117,7 +122,6 @@ export default function App() {
             setChatParams({ pacienteId: user?.cpf, role: "paciente" });
             setScreen("chatMedico");
           }}
-          
           onGoReceitas={() => setScreen("pacienteReceitas")}
         />
       )}
@@ -131,12 +135,11 @@ export default function App() {
           }}
           onGoBuscarExames={() => setScreen("buscarExames")}
           onGoChat={() => setScreen("listaPacientes")}
-          
           onGoReceitas={() => setScreen("buscarReceitas")}
+          onGoAtestado={() => setScreen("buscarAtestado")}
         />
       )}
 
-    
       {screen === "buscarExames" && (
         <BuscarExamesCPF
           onVoltar={() =>
@@ -170,7 +173,6 @@ export default function App() {
         />
       )}
 
-    
       {screen === "cadastrarConvenio" && (
         <CadastrarConvenio
           onVoltar={() => setScreen("homeUsuario")}
@@ -186,7 +188,6 @@ export default function App() {
         />
       )}
 
-    
       {screen === "inserirConsulta" && (
         <InserirConsulta
           onVoltar={() => setScreen("homeUsuario")}
@@ -219,7 +220,6 @@ export default function App() {
         />
       )}
 
-    
       {screen === "pacienteExames" && (
         <PacienteExames
           cpf={user?.cpf}
@@ -227,7 +227,7 @@ export default function App() {
         />
       )}
 
-      
+      {/* ===== Chat ===== */}
       {screen === "chatMedico" && (
         <ChatMedico
           medicoId={chatParams?.medicoId ?? medico?.crm}
@@ -256,7 +256,7 @@ export default function App() {
         />
       )}
 
-
+      {/* ===== Receitas ===== */}
       {screen === "buscarReceitas" && (
         <BuscarReceitasCPF
           onVoltar={() => setScreen("homeDoutor")}
@@ -281,7 +281,6 @@ export default function App() {
         />
       )}
 
-     
       {screen === "pacienteReceitas" && (
         <PacienteReceitas
           cpf={user?.cpf}
@@ -293,17 +292,33 @@ export default function App() {
         />
       )}
 
-  
       {screen === "visualizarReceita" && (
         <VisualizarReceita
           receita={receitaSelecionada}
           onVoltar={() => {
-          
             if (medico) setScreen("buscarReceitas");
             else setScreen("pacienteReceitas");
           }}
         />
       )}
+
+      
+
+      {screen === "buscarAtestado" && (
+        <BuscarAtestadoCPF
+          onVoltar={() => setScreen("homeDoutor")}
+          onCriarAtestado={({ cpf, paciente }) => {
+            setAtestadoCpf(cpf);
+            setAtestadoPaciente(paciente);
+            setScreen("criarAtestado");
+          }}
+          onVisualizarPdf={(item) => {
+            setAtestadoSelecionado(item);
+            setScreen("visualizarAtestado");
+          }}
+        />
+      )}
+
 
       <StatusBar style="light" />
     </View>
