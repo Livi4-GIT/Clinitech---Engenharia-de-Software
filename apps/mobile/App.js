@@ -8,17 +8,19 @@ import ConfirmacaoCadastroMedico from "./components/ConfirmacaoCadastroMedico";
 import CadastroMedico from "./components/CadastroMedico";
 
 import HomeUsuario from "./components/HomeUsuario";
-import HomeDoutor from "./components/HomeDoutor"; // ✅ este é o home do médico que você criou
-
-import PerfilPaciente from "./components/PerfilPaciente.js";
+import HomeDoutor from "./components/HomeDoutor";
+import PerfilPaciente from "./components/PerfilPaciente";
+import EditarPerfilPaciente from "./components/EditarPerfilPaciente";
 
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
+  const [cpfLogado, setCpfLogado] = useState(null);
 
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
+    setCpfLogado(u.cpf);
     setScreen("homeUsuario");
     console.log("LOGIN OK. Usuário:", u);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
@@ -26,6 +28,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      {/* Login Usuário */}
       {screen === "login" && (
         <LoginUsuario
           onGoCadastro={() => setScreen("cadastro")}
@@ -34,6 +37,7 @@ export default function App() {
         />
       )}
 
+      {/* Cadastro Usuário */}
       {screen === "cadastro" && (
         <>
           <CadastroUsuario onAfterSave={() => setScreen("login")} />
@@ -45,19 +49,21 @@ export default function App() {
         </>
       )}
 
+      {/* Login Médico */}
       {screen === "loginMedico" && (
         <LoginMedico
           onGoLoginUsuario={() => setScreen("login")}
           onGoCadastroMedico={() => setScreen("confirmacaoCadastroMedico")}
           onLoginSuccess={(med) => {
             setMedico(med);
-            setScreen("homeDoutor"); // ✅ bate com o nome da tela abaixo
+            setScreen("homeDoutor");
             console.log("Login médico OK", med);
             Alert.alert("Bem-vindo!", "Login médico realizado.");
           }}
         />
       )}
 
+      {/* Confirmação Cadastro Médico */}
       {screen === "confirmacaoCadastroMedico" && (
         <ConfirmacaoCadastroMedico
           onVoltar={() => setScreen("loginMedico")}
@@ -65,6 +71,7 @@ export default function App() {
         />
       )}
 
+      {/* Cadastro Médico */}
       {screen === "cadastroMedico" && (
         <CadastroMedico
           onAfterSave={() => setScreen("loginMedico")}
@@ -72,23 +79,34 @@ export default function App() {
         />
       )}
 
+      {/* Home Usuário */}
       {screen === "homeUsuario" && (
         <HomeUsuario
-        user={user}
-        onLogout={() => setScreen("login")}
-        onVerPerfil={() => setScreen("perfilPaciente")}
-     />
-    )}
+          user={user}
+          onLogout={() => setScreen("login")}
+          onVerPerfil={() => setScreen("perfilPaciente")}
+        />
+      )}
 
-    {screen === "perfilPaciente" && (
-      <PerfilPaciente
-       cpfLogado={user?.cpf}   // ✅ envia o CPF do usuário logado
-       onGoEditar={() => Alert.alert("Editar ainda não implementado")}
-       onVoltar={() => setScreen("homeUsuario")}
-      />
-    )}
+      {/* Perfil Usuário */}
+      {screen === "perfilPaciente" && (
+        <PerfilPaciente
+          cpfLogado={cpfLogado}
+          onVoltar={() => setScreen("homeUsuario")}
+          onGoEditar={() => setScreen("editarPerfilPaciente")}
+        />
+      )}
 
-      {screen === "homeDoutor" && ( // ✅ condição certa
+      {/* Edição Perfil Usuário */}
+      {screen === "editarPerfilPaciente" && (
+        <EditarPerfilPaciente
+          cpfLogado={cpfLogado}
+          onVoltar={() => setScreen("perfilPaciente")}
+        />
+      )}
+
+      {/* Home Médico */}
+      {screen === "homeDoutor" && (
         <HomeDoutor medico={medico} onLogout={() => setScreen("loginMedico")} />
       )}
 
