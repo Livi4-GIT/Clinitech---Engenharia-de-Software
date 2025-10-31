@@ -1,4 +1,3 @@
-// Atestado.js
 import React from "react";
 import {
   View,
@@ -28,7 +27,6 @@ export default class Atestado extends React.Component {
     };
   }
 
-  // ===== Helpers de CPF (mesmos da base) =====
   somenteDigitos = (v) => (v || "").replace(/\D+/g, "");
   formatarCPF = (v) => {
     const d = this.somenteDigitos(v).slice(0, 11);
@@ -57,29 +55,17 @@ export default class Atestado extends React.Component {
     return dv2 === parseInt(s[10], 10);
   };
 
-  // ===== Status helpers (reuso) =====
   isPendente = (status) => {
     const s = String(status || "").toLowerCase();
     return s.includes("pend") || s.includes("aguard");
   };
   isLiberado = (status) => {
     const s = String(status || "").toLowerCase();
-    return (
-      s.includes("emit") || // "Emitido"
-      s.includes("liber") ||
-      s.includes("final") ||
-      s.includes("ok")
-    );
+    return s.includes("emit") || s.includes("liber") || s.includes("final") || s.includes("ok");
   };
   isEstadoTerminalRuim = (status) => {
     const s = String(status || "").toLowerCase();
-    return (
-      s.includes("recus") ||
-      s.includes("rejei") ||
-      s.includes("cancel") ||
-      s.includes("erro") ||
-      s.includes("falh")
-    );
+    return s.includes("recus") || s.includes("rejei") || s.includes("cancel") || s.includes("erro") || s.includes("falh");
   };
 
   statusIcon = (status) => {
@@ -92,16 +78,12 @@ export default class Atestado extends React.Component {
 
   statusChipStyle = (status) => {
     const s = String(status || "").toLowerCase();
-    if (this.isPendente(s))
-      return { bg: "rgba(255,205,86,0.15)", border: "rgba(255,205,86,0.45)" };
-    if (this.isLiberado(s))
-      return { bg: "rgba(75,192,192,0.15)", border: "rgba(75,192,192,0.45)" };
-    if (this.isEstadoTerminalRuim(s))
-      return { bg: "rgba(255,99,132,0.15)", border: "rgba(255,99,132,0.45)" };
+    if (this.isPendente(s)) return { bg: "rgba(255,205,86,0.15)", border: "rgba(255,205,86,0.45)" };
+    if (this.isLiberado(s)) return { bg: "rgba(75,192,192,0.15)", border: "rgba(75,192,192,0.45)" };
+    if (this.isEstadoTerminalRuim(s)) return { bg: "rgba(255,99,132,0.15)", border: "rgba(255,99,132,0.45)" };
     return { bg: "rgba(214,228,255,0.12)", border: "rgba(214,228,255,0.28)" };
   };
 
-  // ===== Datas (se precisar evoluir regras de vencimento/etc) =====
   parseDate = (str) => {
     if (!str || typeof str !== "string") return null;
     const s = str.trim();
@@ -119,7 +101,6 @@ export default class Atestado extends React.Component {
     return isNaN(d.getTime()) ? null : d;
   };
 
-  // 🔍 Buscar atestados e dados do paciente
   buscar = async () => {
     try {
       const { cpf } = this.state;
@@ -132,7 +113,7 @@ export default class Atestado extends React.Component {
       const [pacSemPrefixo, pacComPrefixo, atestadosStr] = await Promise.all([
         AsyncStorage.getItem(cpfN),
         AsyncStorage.getItem(`PAC_${cpfN}`),
-        AsyncStorage.getItem(`ATE_${cpfN}`), // <- lista de atestados para o CPF
+        AsyncStorage.getItem(`ATE_${cpfN}`),
       ]);
 
       const pacienteStr = pacSemPrefixo || pacComPrefixo;
@@ -142,7 +123,7 @@ export default class Atestado extends React.Component {
       const atestadosNorm = Array.isArray(atestados)
         ? atestados.map((a) => ({
             id: a.id || Date.now() + Math.random(),
-            dataEmissao: a.dataEmissao || "—", // "DD/MM/AAAA" ou "YYYY-MM-DD"
+            dataEmissao: a.dataEmissao || "—",
             diasAfastamento: a.diasAfastamento ?? "—",
             cid: a.cid || a.cid10 || "—",
             motivo: a.motivo || a.diagnostico || "",
@@ -187,19 +168,19 @@ export default class Atestado extends React.Component {
     }
   };
 
-  handleEmitirAtestado = () => {
+  handleCriarAtestado = () => {
     const { paciente, cpf } = this.state;
     if (!paciente) return;
     const cpfN = this.somenteDigitos(paciente?.cpf || cpf);
     if (cpfN.length !== 11) {
       return Alert.alert("CPF inválido", "Informe/valide o CPF do paciente.");
     }
-    if (this.props.onEmitirAtestado) {
-      this.props.onEmitirAtestado({ cpf: cpfN, paciente });
+    if (this.props.onCriarAtestado) {
+      this.props.onCriarAtestado({ cpf: cpfN, paciente });
     } else if (this.props.navigation?.navigate) {
-      this.props.navigation.navigate("EmitirAtestado", { cpf: cpfN, paciente });
+      this.props.navigation.navigate("CriarAtestado", { cpf: cpfN, paciente });
     } else {
-      Alert.alert("Ação", `Navegar para emissão de atestado (CPF ${cpfN}).`);
+      Alert.alert("Ação", `Navegar para criação de atestado (CPF ${cpfN}).`);
     }
   };
 
@@ -300,16 +281,15 @@ export default class Atestado extends React.Component {
           })
         )}
 
-        {/* ➕ Emitir novo atestado (mostra quando há paciente) */}
         {paciente && (
           <LinearGradient colors={["#2f6edb", "#1f4fb6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.btn, { marginTop: 16 }]}>
             <Pressable
-              onPress={this.handleEmitirAtestado}
+              onPress={this.handleCriarAtestado}
               style={styles.btnPress}
               accessibilityRole="button"
-              accessibilityLabel="Emitir novo atestado para esse CPF"
+              accessibilityLabel="Criar novo atestado para esse CPF"
             >
-              <Text style={styles.btnText}>Emitir atestado para esse CPF</Text>
+              <Text style={styles.btnText}>Criar atestado para esse CPF</Text>
             </Pressable>
           </LinearGradient>
         )}

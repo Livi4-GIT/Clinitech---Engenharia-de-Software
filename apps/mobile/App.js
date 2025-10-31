@@ -33,7 +33,8 @@ import VisualizarReceita from "./components/VisualizarReceita";
 
 import BuscarAtestadoCPF from "./components/BuscarAtestadoCPF";
 import VisualizarAtestado from "./components/VisualizarAtestado";
-import PacienteAtestado from "./components/PacienteAtestado"; 
+import PacienteAtestado from "./components/PacienteAtestado";
+import CriarAtestado from "./components/CriarAtestado";
 
 export default function App() {
   const [screen, setScreen] = useState("login");
@@ -125,7 +126,7 @@ export default function App() {
             setScreen("chatMedico");
           }}
           onGoReceitas={() => setScreen("pacienteReceitas")}
-          onGoAtestados={() => setScreen("pacienteAtestados")} 
+          onGoAtestados={() => setScreen("pacienteAtestados")}
         />
       )}
 
@@ -143,7 +144,6 @@ export default function App() {
         />
       )}
 
-      {/* ===== Exames ===== */}
       {screen === "buscarExames" && (
         <BuscarExamesCPF
           onVoltar={() =>
@@ -177,7 +177,6 @@ export default function App() {
         />
       )}
 
-      {/* ===== Convênio / Consultas ===== */}
       {screen === "cadastrarConvenio" && (
         <CadastrarConvenio
           onVoltar={() => setScreen("homeUsuario")}
@@ -225,7 +224,6 @@ export default function App() {
         />
       )}
 
-      {/* ===== Exames (Paciente) ===== */}
       {screen === "pacienteExames" && (
         <PacienteExames
           cpf={user?.cpf}
@@ -233,7 +231,6 @@ export default function App() {
         />
       )}
 
-      {/* ===== Chat ===== */}
       {screen === "chatMedico" && (
         <ChatMedico
           medicoId={chatParams?.medicoId ?? medico?.crm}
@@ -262,7 +259,6 @@ export default function App() {
         />
       )}
 
-      {/* ===== Receitas (Médico e Paciente) ===== */}
       {screen === "buscarReceitas" && (
         <BuscarReceitasCPF
           onVoltar={() => setScreen("homeDoutor")}
@@ -323,6 +319,15 @@ export default function App() {
         />
       )}
 
+      {screen === "criarAtestado" && (
+        <CriarAtestado
+          initialCpf={atestadoCpf}
+          paciente={atestadoPaciente}
+          onVoltar={() => setScreen("buscarAtestado")}
+          onSaved={() => setScreen("buscarAtestado")}
+        />
+      )}
+
       {screen === "pacienteAtestados" && (
         <PacienteAtestado
           cpf={user?.cpf}
@@ -339,7 +344,7 @@ export default function App() {
           atestado={atestadoSelecionado}
           onVoltar={() => {
             if (medico) setScreen("buscarAtestado");
-            else setScreen("pacienteAtestados"); 
+            else setScreen("pacienteAtestados");
           }}
         />
       )}
