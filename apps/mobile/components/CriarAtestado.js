@@ -178,17 +178,7 @@ export default class CriarAtestado extends React.Component {
                 })}
               </View>
 
-              <View style={{ marginTop: 12 }}>
-                <Text style={styles.fieldLabel}>CID (opcional)</Text>
-                {this.Input({
-                  icon: "file-document-outline",
-                  placeholder: "Ex.: J06.9",
-                  value: cid,
-                  onChangeText: (v) => this.setState({ cid: v }),
-                  maxLength: 12,
-                })}
-              </View>
-
+              
               <View style={{ marginTop: 12 }}>
                 <Text style={styles.fieldLabel}>Motivo / Observações (opcional)</Text>
                 {this.Input({

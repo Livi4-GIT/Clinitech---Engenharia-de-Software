@@ -19,7 +19,6 @@ export default class CriarReceitas extends React.Component {
     };
   }
 
-  
   somenteDigitos = (v) => (v || "").replace(/\D+/g, "");
   formatarDataInput = (v) => {
     const d = this.somenteDigitos(v).slice(0, 8);
@@ -43,7 +42,6 @@ export default class CriarReceitas extends React.Component {
     return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9, 11)}`;
   };
 
-  
   pickPdf = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({
@@ -61,7 +59,6 @@ export default class CriarReceitas extends React.Component {
     }
   };
 
- 
   salvar = async () => {
     try {
       const { titulo, vencimento, pdfUri, pdfNome } = this.state;
@@ -71,13 +68,14 @@ export default class CriarReceitas extends React.Component {
       if (!paciente || !cpfN) return Alert.alert("Atenção", "Paciente/CPF inválido.");
       if (!titulo.trim()) return Alert.alert("Atenção", "Informe o título da receita.");
       if (!this.validarDataBR(vencimento)) return Alert.alert("Data inválida", "Use o formato DD/MM/AAAA.");
+      if (!pdfUri) return Alert.alert("PDF obrigatório", "Anexe o PDF da receita antes de salvar.");
 
       const nova = {
         id: String(Date.now()),
         titulo: titulo.trim(),
         vencimento: vencimento.trim(),
-        pdfUri: pdfUri || null,
-        pdfNome: pdfNome || null,
+        pdfUri,
+        pdfNome: pdfNome || "receita.pdf",
       };
 
       const key = `REC_${cpfN}`;
@@ -112,9 +110,9 @@ export default class CriarReceitas extends React.Component {
 
   render() {
     const { paciente, initialCpf } = this.props;
-    const { titulo, vencimento, pdfNome } = this.state;
+    const { titulo, vencimento, pdfNome, pdfUri } = this.state;
 
-    const canSave = !!paciente && !!titulo.trim() && this.validarDataBR(vencimento);
+    const canSave = !!paciente && !!titulo.trim() && this.validarDataBR(vencimento) && !!pdfUri;
 
     return (
       <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
@@ -167,12 +165,13 @@ export default class CriarReceitas extends React.Component {
               </View>
 
               <View style={{ marginTop: 12 }}>
-                <Text style={styles.fieldLabel}>Anexar PDF (opcional)</Text>
+                <Text style={styles.fieldLabel}>Anexar PDF</Text>
                 <LinearGradient colors={["#2f6edb", "#1f4fb6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.btn, { marginTop: 8 }]}>
                   <Pressable onPress={this.pickPdf} style={styles.btnPress} accessibilityRole="button">
                     <Text style={styles.btnText}>{pdfNome ? `Selecionado: ${pdfNome}` : "Selecionar PDF da receita"}</Text>
                   </Pressable>
                 </LinearGradient>
+                {!pdfUri && <Text style={styles.hintWarning}>Anexe o PDF da receita para habilitar o botão de salvar.</Text>}
               </View>
             </View>
 
@@ -227,4 +226,5 @@ const styles = StyleSheet.create({
   btn: { marginTop: 12, borderRadius: 14, overflow: "hidden" },
   btnPress: { paddingVertical: 14, alignItems: "center" },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+  hintWarning: { marginTop: 8, color: "#ffd166", textAlign: "center", fontWeight: "700" },
 });
