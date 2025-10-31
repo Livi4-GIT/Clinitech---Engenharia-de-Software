@@ -10,6 +10,8 @@ import CadastroMedico from "./components/CadastroMedico";
 import HomeUsuario from "./components/HomeUsuario";
 import HomeDoutor from "./components/HomeDoutor"; // ✅ este é o home do médico que você criou
 
+import PerfilPaciente from "./components/PerfilPaciente.js";
+
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
@@ -71,8 +73,20 @@ export default function App() {
       )}
 
       {screen === "homeUsuario" && (
-        <HomeUsuario user={user} onLogout={() => setScreen("login")} />
-      )}
+        <HomeUsuario
+        user={user}
+        onLogout={() => setScreen("login")}
+        onVerPerfil={() => setScreen("perfilPaciente")}
+     />
+    )}
+
+    {screen === "perfilPaciente" && (
+      <PerfilPaciente
+       cpfLogado={user?.cpf}   // ✅ envia o CPF do usuário logado
+       onGoEditar={() => Alert.alert("Editar ainda não implementado")}
+       onVoltar={() => setScreen("homeUsuario")}
+      />
+    )}
 
       {screen === "homeDoutor" && ( // ✅ condição certa
         <HomeDoutor medico={medico} onLogout={() => setScreen("loginMedico")} />

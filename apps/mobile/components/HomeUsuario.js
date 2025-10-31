@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-  View, Text, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet,
+  View, Text, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet,Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function HomeScreen({ user, onLogout }) {
+export default function HomeUsuario({ user, onLogout, onVerPerfil }){
   const nome = user?.nome || 'Fulano';
 
   return (
@@ -18,12 +18,16 @@ export default function HomeScreen({ user, onLogout }) {
       <SafeAreaView style={styles.container}>
         <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
 
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Seja Bem-Vindo, {nome}</Text>
-          <View style={styles.profileCircle}>
-            <Ionicons name="person-outline" size={32} color="#3E1B83" />
-          </View>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Seja Bem-Vindo, {nome}</Text>
+        <Pressable
+          style={styles.profileCircle}
+          onPress={onVerPerfil} // ✅
+          >
+          <Ionicons name="person-outline" size={32} color="#3E1B83" />
+        </Pressable>
+      </View>
+
 
         <View style={styles.grid}>
           <View style={styles.row}>
