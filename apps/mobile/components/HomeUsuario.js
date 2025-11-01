@@ -22,7 +22,7 @@ export default function HomeUsuario({ user, onLogout, onVerPerfil }){
         <Text style={styles.headerText}>Seja Bem-Vindo, {nome}</Text>
         <Pressable
           style={styles.profileCircle}
-          onPress={onVerPerfil} // ✅
+          onPress={onVerPerfil} 
           >
           <Ionicons name="person-outline" size={32} color="#3E1B83" />
         </Pressable>

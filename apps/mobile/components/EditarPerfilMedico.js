@@ -12,9 +12,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function EditarPerfilUsuario({ user, onVoltar }) {
-  const [celular, setCelular] = useState(user?.celular || "");
-  const [cep, setCep] = useState(user?.cep || "");
+export default function EditarPerfilMedico({ medico, onVoltar }) {
+  const [telefone, setTelefone] = useState(medico?.telefone || "");
+  const [cep, setCep] = useState(medico?.cep || "");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
@@ -37,17 +37,20 @@ export default function EditarPerfilUsuario({ user, onVoltar }) {
 
   const handleSalvar = async () => {
     if (!senhaAtual) return Alert.alert("Erro", "Informe a senha atual.");
-    if (senhaAtual !== user.senha)
+    if (senhaAtual !== medico.senha)
       return Alert.alert("Erro", "Senha atual incorreta.");
 
-    const telLimpo = somenteDigitos(celular);
+    // validação telefone
+    const telLimpo = somenteDigitos(telefone);
     if (telLimpo.length < 10 || telLimpo.length > 11)
       return Alert.alert("Erro", "Telefone inválido. Deve ter 10 ou 11 dígitos.");
 
+    // validação CEP
     const cepLimpo = somenteDigitos(cep);
     if (cepLimpo.length !== 8)
       return Alert.alert("Erro", "CEP inválido. Deve conter 8 dígitos.");
 
+    // validação nova senha
     if (novaSenha && novaSenha.length < 8)
       return Alert.alert("Erro", "Nova senha deve ter pelo menos 8 caracteres.");
 
@@ -55,14 +58,14 @@ export default function EditarPerfilUsuario({ user, onVoltar }) {
       return Alert.alert("Erro", "Confirmação de senha não confere.");
 
     const atualizado = {
-      ...user,
-      celular: telLimpo,
+      ...medico,
+      telefone: telLimpo,
       cep: cepLimpo,
-      senha: novaSenha ? novaSenha : user.senha,
+      senha: novaSenha ? novaSenha : medico.senha,
     };
 
     try {
-      await AsyncStorage.setItem(user.cpf, JSON.stringify(atualizado));
+      await AsyncStorage.setItem(`MED_${medico.crm}`, JSON.stringify(atualizado));
       Alert.alert("Sucesso", "Dados atualizados com sucesso!");
       onVoltar();
     } catch (e) {
@@ -78,16 +81,16 @@ export default function EditarPerfilUsuario({ user, onVoltar }) {
       end={{ x: 1, y: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Editar Perfil</Text>
+        <Text style={styles.title}>Editar Perfil Médico</Text>
 
         <View style={styles.inputWrap}>
           <MaterialCommunityIcons name="phone" size={22} color="#fff" />
           <TextInput
             style={styles.input}
-            placeholder="Celular"
+            placeholder="Telefone"
             placeholderTextColor="#ccc"
-            value={celular}
-            onChangeText={(v) => setCelular(formatarCelular(v))}
+            value={telefone}
+            onChangeText={(v) => setTelefone(formatarCelular(v))}
             keyboardType="number-pad"
           />
         </View>

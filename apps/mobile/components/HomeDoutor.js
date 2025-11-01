@@ -6,11 +6,12 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function HomeDoutor({ medico, onLogout }) {
+export default function HomeDoutor({ medico, onLogout, onVerPerfil }) {
   const nome = medico?.nome || "Dr. Ciclano";
 
   return (
@@ -25,9 +26,11 @@ export default function HomeDoutor({ medico, onLogout }) {
 
         <View style={styles.header}>
           <Text style={styles.headerText}>Olá Dr {nome}!</Text>
-          <View style={styles.profileCircle}>
+
+          {/* 👇 Tornamos o ícone de perfil clicável */}
+          <Pressable style={styles.profileCircle} onPress={onVerPerfil}>
             <Ionicons name="person-outline" size={32} color="#3E1B83" />
-          </View>
+          </Pressable>
         </View>
 
         <View style={styles.grid}>

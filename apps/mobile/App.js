@@ -12,6 +12,9 @@ import HomeDoutor from "./components/HomeDoutor";
 import PerfilPaciente from "./components/PerfilPaciente";
 import EditarPerfilPaciente from "./components/EditarPerfilPaciente";
 
+import PerfilMedico from "./components/PerfilMedico";
+import EditarPerfilMedico from "./components/EditarPerfilMedico";
+
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
@@ -107,8 +110,28 @@ export default function App() {
 
       {/* Home Médico */}
       {screen === "homeDoutor" && (
-        <HomeDoutor medico={medico} onLogout={() => setScreen("loginMedico")} />
+        <HomeDoutor 
+        medico={medico} 
+        onLogout={() => setScreen("loginMedico")} 
+        onVerPerfil={() => setScreen("perfilMedico")} 
+        />
       )}
+
+      {screen === "perfilMedico" && (
+        <PerfilMedico
+          medico={medico}
+          onGoEditar={() => setScreen("editarPerfilMedico")}
+          onVoltarHome={() => setScreen("homeDoutor")}
+        />
+      )}
+
+      {screen === "editarPerfilMedico" && (
+        <EditarPerfilMedico
+          medico={medico}
+          onVoltar={() => setScreen("perfilMedico")}
+       />
+      )}
+
 
       <StatusBar style="light" />
     </View>
