@@ -1,208 +1,211 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StatusBar, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert,
-  SafeAreaView, Modal, Pressable
+  View, Text, TextInput, Pressable, Alert, StyleSheet,
+  ScrollView, KeyboardAvoidingView, Platform,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 
+const STORAGE_KEY = "@clinitech_convenio";
 const BANDEIRAS = ["Unimed", "Amil", "SulAmérica", "Bradesco", "Hapvida", "Allianz Saúde", "Outra"];
 
-export default function AtualizarConvenio({ onVoltar, onSaved }) {
-  const [bandeira, setBandeira] = useState(BANDEIRAS[0]);
-  const [bandeiraOutra, setBandeiraOutra] = useState("");
-  const [numero, setNumero] = useState("");
-  const [nome, setNome] = useState("");
+export default class AtualizarConvenio extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      bandeira: BANDEIRAS[0],
+      bandeiraOutra: "",
+      numero: "",
+      nome: "",
+      carregando: false,
+    };
+  }
 
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [tempBandeira, setTempBandeira] = useState(bandeira);
+  async componentDidMount() {
+    await this.prefill();
+  }
 
-  const bandeiraValue = bandeira === "Outra" ? bandeiraOutra.trim() : bandeira;
+  prefill = async () => {
+    try {
+      this.setState({ carregando: true });
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const convenio = raw ? JSON.parse(raw) : null;
 
-  const submit = () => {
-    if (!bandeiraValue || !numero.trim() || !nome.trim()) {
-      Alert.alert("Atenção", "Preencha todos os campos.");
-      return;
+      if (!convenio) {
+        this.setState({ carregando: false });
+        return Alert.alert("Atenção", "Nenhum convênio cadastrado.");
+      }
+
+      // Se a bandeira atual não estiver na lista, trata como "Outra"
+      const isKnown = BANDEIRAS.includes(convenio.bandeira);
+      this.setState({
+        bandeira: isKnown ? convenio.bandeira : "Outra",
+        bandeiraOutra: isKnown ? "" : convenio.bandeira,
+        numero: convenio.numero || "",
+        nome: convenio.nome || "",
+        carregando: false,
+      });
+    } catch {
+      this.setState({ carregando: false });
+      Alert.alert("Erro", "Não foi possível carregar o convênio.");
     }
-    if (!/^\d{4,}$/.test(numero.trim())) {
-      Alert.alert("Atenção", "Número do convênio deve ter pelo menos 4 dígitos.");
-      return;
+  };
+
+  salvar = async () => {
+    try {
+      const { bandeira, bandeiraOutra, numero, nome } = this.state;
+      const bandeiraValue = (bandeira === "Outra" ? bandeiraOutra : bandeira).trim();
+      const num = (numero || "").replace(/\D+/g, "");
+      const nm = (nome || "").trim();
+
+      if (!bandeiraValue || !num || !nm) {
+        return Alert.alert("Atenção", "Preencha todos os campos.");
+      }
+      if (!/^\d{4,}$/.test(num)) {
+        return Alert.alert("Atenção", "Número do convênio deve ter pelo menos 4 dígitos.");
+      }
+
+      const payload = { bandeira: bandeiraValue, numero: num, nome: nm };
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      Alert.alert("Sucesso", "Convênio atualizado!", [
+        { text: "OK", onPress: () => this.props?.onSaved?.() },
+      ]);
+    } catch {
+      Alert.alert("Erro", "Não foi possível salvar as alterações.");
     }
-    Alert.alert("Sucesso", "Convênio atualizado!", [{ text: "OK", onPress: () => onSaved?.() }]);
   };
 
-  const openPicker = () => {
-    setTempBandeira(bandeira);
-    setPickerOpen(true);
-  };
+  render() {
+    const { bandeira, bandeiraOutra, numero, nome } = this.state;
+    const isIOS = Platform.OS === "ios";
 
-  const confirmPicker = () => {
-    setBandeira(tempBandeira);
-    setPickerOpen(false);
-  };
+    return (
+      <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
+            <View style={styles.card}>
+              <Text style={styles.title}>Atualizar Convênio</Text>
 
-  return (
-    <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
-        <View style={styles.headerBar}>
-          <TouchableOpacity onPress={() => onVoltar?.()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={22} color="#eaf1ff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Atualizar Convênio</Text>
-          <View style={{ width: 34 }} />
-        </View>
+              <Text style={styles.fieldLabel}>Bandeira do convênio</Text>
 
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-          <ScrollView contentContainerStyle={styles.formWrap}>
-            <Text style={styles.sectionLabel}>Bandeira do convênio</Text>
+              {!isIOS && (
+                <View style={styles.selectWrap}>
+                  <MaterialCommunityIcons name="credit-card-outline" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                  <Picker
+                    selectedValue={bandeira}
+                    onValueChange={(v) => this.setState({ bandeira: v })}
+                    style={styles.androidPicker}
+                    dropdownIconColor="#d6e4ff"
+                    mode="dropdown"
+                  >
+                    {BANDEIRAS.map((opt) => (
+                      <Picker.Item key={opt} label={opt} value={opt} style={styles.pickerItemSmall} />
+                    ))}
+                  </Picker>
+                </View>
+              )}
 
-            <Pressable style={[styles.input, styles.selectInput]} onPress={openPicker}>
-              <Text style={styles.selectText}>{bandeira}</Text>
-              <Ionicons name="chevron-down" size={18} color="#eaf1ff" style={{ opacity: 0.9 }} />
-            </Pressable>
+              {isIOS && (
+                <View style={styles.iosPickerWrap}>
+                  <Picker selectedValue={bandeira} onValueChange={(v) => this.setState({ bandeira: v })} itemStyle={styles.iosPickerItem}>
+                    {BANDEIRAS.map((opt) => (
+                      <Picker.Item key={opt} label={opt} value={opt} />
+                    ))}
+                  </Picker>
+                </View>
+              )}
 
-            {bandeira === "Outra" && (
-              <TextInput
-                style={styles.input}
-                placeholder="Digite a bandeira"
-                placeholderTextColor="#cfe0ff"
-                value={bandeiraOutra}
-                onChangeText={setBandeiraOutra}
-                autoCapitalize="words"
-                returnKeyType="next"
-              />
-            )}
+              {bandeira === "Outra" && (
+                <View style={{ marginTop: 8 }}>
+                  <Text style={styles.fieldLabel}>Outra (especificar)</Text>
+                  <View style={styles.inputWrap}>
+                    <MaterialCommunityIcons name="pencil" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Ex.: Plano X"
+                      placeholderTextColor="#b8c7f8"
+                      value={bandeiraOutra}
+                      onChangeText={(v) => this.setState({ bandeiraOutra: v })}
+                    />
+                  </View>
+                </View>
+              )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="Número do convênio"
-              placeholderTextColor="#cfe0ff"
-              value={numero}
-              onChangeText={(v) => setNumero(v.replace(/\D+/g, ""))}
-              keyboardType="number-pad"
-              returnKeyType="next"
-              maxLength={20}
-            />
+              <View style={{ marginTop: 12 }}>
+                <Text style={styles.fieldLabel}>Número do convênio</Text>
+                <View style={styles.inputWrap}>
+                  <MaterialCommunityIcons name="numeric" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Somente números"
+                    placeholderTextColor="#b8c7f8"
+                    keyboardType="number-pad"
+                    value={numero}
+                    onChangeText={(v) => this.setState({ numero: v.replace(/\D+/g, "") })}
+                    maxLength={20}
+                  />
+                </View>
+              </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Nome completo"
-              placeholderTextColor="#cfe0ff"
-              value={nome}
-              onChangeText={setNome}
-              autoCapitalize="words"
-              returnKeyType="done"
-              onSubmitEditing={submit}
-            />
+              <View style={{ marginTop: 12 }}>
+                <Text style={styles.fieldLabel}>Nome completo do titular</Text>
+                <View style={styles.inputWrap}>
+                  <MaterialCommunityIcons name="account" size={20} color="#d6e4ff" style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nome"
+                    placeholderTextColor="#b8c7f8"
+                    value={nome}
+                    onChangeText={(v) => this.setState({ nome: v })}
+                    autoCapitalize="words"
+                  />
+                </View>
+              </View>
 
-            <TouchableOpacity style={styles.btnOutline} onPress={submit}>
-              <Text style={styles.btnOutlineText}>Salvar alterações</Text>
-            </TouchableOpacity>
+              <LinearGradient colors={["#2f6edb", "#1f4fb6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.btn, { marginTop: 16 }]}>
+                <Pressable onPress={this.salvar} style={styles.btnPress} accessibilityRole="button">
+                  <Text style={styles.btnText}>Salvar alterações</Text>
+                </Pressable>
+              </LinearGradient>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
-
-      <Modal transparent visible={pickerOpen} animationType="fade" onRequestClose={() => setPickerOpen(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Selecione a bandeira</Text>
-            <View style={styles.modalPickerWrap}>
-              <Picker selectedValue={tempBandeira} onValueChange={setTempBandeira}>
-                {BANDEIRAS.map((opt) => (
-                  <Picker.Item key={opt} label={opt} value={opt} />
-                ))}
-              </Picker>
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setPickerOpen(false)} style={[styles.modalBtn, styles.btnGhost]}>
-                <Text style={styles.modalBtnText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={confirmPicker} style={[styles.modalBtn, styles.btnPrimary]}>
-                <Text style={[styles.modalBtnText, styles.modalBtnTextStrong]}>Selecionar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </LinearGradient>
-  );
+      </LinearGradient>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
-  headerBar: {
-    paddingHorizontal: 16, paddingVertical: 10,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+  center: { flexGrow: 1, padding: 20, paddingTop: 28 },
+  card: {
+    borderRadius: 28, padding: 22, marginTop: 70,
+    backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
   },
-  backBtn: {
-    width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.12)", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)",
-  },
-  headerTitle: { color: "#eaf1ff", fontSize: 16, fontWeight: "700" },
+  title: { color: "#eaf1ff", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 16 },
 
-  formWrap: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 24, gap: 12 },
-  sectionLabel: { color: "#eaf1ff", fontSize: 14, fontWeight: "700", marginBottom: 4 },
+  fieldLabel: { color: "#cdd9ff", fontWeight: "700" },
 
-  input: {
-    backgroundColor: "rgba(255,255,255,0.20)",
-    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12,
-    color: "#eaf1ff", fontSize: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.18)",
+  inputWrap: {
+    flexDirection: "row", alignItems: "center", marginTop: 8,
+    borderBottomWidth: 1, borderBottomColor: "rgba(214,228,255,0.4)", paddingBottom: 4,
   },
+  input: { flex: 1, minHeight: 40, color: "#eaf1ff" },
 
-  selectInput: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  selectText: { color: "#eaf1ff", fontSize: 14, fontWeight: "600" },
+  selectWrap: {
+    flexDirection: "row", alignItems: "center", marginTop: 8,
+    borderBottomWidth: 1, borderBottomColor: "rgba(214,228,255,0.4)", paddingBottom: 4,
+  },
+  androidPicker: { flex: 1, color: "#eaf1ff", height: 40, fontSize: 13 },
+  pickerItemSmall: { color: "#eaf1ff", fontSize: 13 },
+  iosPickerWrap: {
+    marginTop: 8, borderWidth: 1, borderColor: "rgba(214,228,255,0.3)",
+    borderRadius: 12, backgroundColor: "rgba(255,255,255,0.05)", overflow: "hidden",
+  },
+  iosPickerItem: { color: "#eaf1ff", height: 180, fontSize: 14 },
 
-  btnOutline: {
-    alignSelf: "center",
-    marginTop: 10,
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.45)",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 22,
-  },
-  btnOutlineText: { color: "#eaf1ff", fontSize: 14, fontWeight: "700" },
-
-  modalOverlay: {
-    flex: 1, backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center", justifyContent: "center",
-    padding: 20,
-  },
-  modalCard: {
-    width: "100%",
-    backgroundColor: "rgba(255,255,255,0.98)",
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.35)",
-  },
-  modalTitle: { fontSize: 16, fontWeight: "700", color: "#0a1a3f", marginBottom: 8 },
-  modalPickerWrap: {
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.08)",
-  },
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
-    marginTop: 12,
-  },
-  modalBtn: {
-    paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8,
-  },
-  btnGhost: {
-    backgroundColor: "transparent",
-  },
-  btnPrimary: {
-    backgroundColor: "#3E1B83",
-  },
-  modalBtnText: { color: "#0a1a3f", fontWeight: "700" },
-  modalBtnTextStrong: { color: "#fff" },
+  btn: { marginTop: 12, borderRadius: 14, overflow: "hidden" },
+  btnPress: { paddingVertical: 14, alignItems: "center" },
+  btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });
