@@ -82,7 +82,7 @@ npx expo start
 ```
 Isso abrirá o menu do Expo contendo várias opções um código QR.
 
-5️⃣ Executando no Dispositivo
+### 5️⃣ Executando no Dispositivo
 Abra o aplicativo Expo Go no celular, escaneie o código QR gerado no terminal de sua máquina e aguarde o carregamento do aplicativo.
 
 ---
