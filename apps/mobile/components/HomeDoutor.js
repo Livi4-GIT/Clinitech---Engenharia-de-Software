@@ -18,7 +18,8 @@ export default function HomeDoutor({
   onGoChat,
   onGoReceitas,
   onGoAtestado,
-  onVerPerfil, // <- adicionamos aqui
+  onVerPerfil,
+  onGoAgenda,
 }) {
   const nome = (medico?.nome || 'Dr. Ciclano').trim();
   const generoRaw = (medico?.genero ?? '')
@@ -70,9 +71,9 @@ export default function HomeDoutor({
         {/* Grade de botões */}
         <View style={styles.grid}>
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox}>
+            <TouchableOpacity style={styles.iconBox} onPress={onGoAgenda}>
               <Ionicons name="calendar-outline" size={42} color="#eaf1ff" />
-              <Text style={styles.label}>Agendamentos</Text>
+              <Text style={styles.label}>Agenda</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.iconBox} onPress={abrirReceitas}>

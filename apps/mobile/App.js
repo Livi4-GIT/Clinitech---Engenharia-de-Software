@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
+import { StatusBar, StyleSheet, View, Text, Pressable, Alert } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import LoginUsuario from "./components/LoginUsuario";
 import CadastroUsuario from "./components/CadastroUsuario";
@@ -40,7 +40,9 @@ import EditarPerfilPaciente from "./components/EditarPerfilPaciente";
 
 import PerfilMedico from "./components/PerfilMedico";
 import EditarPerfilMedico from "./components/EditarPerfilMedico";
+import AgendaMedico from "./components/AgendaMedico";
 
+  
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
@@ -50,6 +52,8 @@ export default function App() {
   const [examCpf, setExamCpf] = useState(null);
   const [examPaciente, setExamPaciente] = useState(null);
 
+  const [consultaAgendada, setConsultaAgendada] = useState(null);
+  const [consultas, setConsultas] = useState([]);
   const [receitaCpf, setReceitaCpf] = useState(null);
   const [receitaPaciente, setReceitaPaciente] = useState(null);
   const [receitaSelecionada, setReceitaSelecionada] = useState(null);
@@ -61,11 +65,38 @@ export default function App() {
   const [medicoFiltrar, setMedicoFiltrar] = useState(null);
   const [chatParams, setChatParams] = useState(null);
 
-  const handleLoginSuccessUsuario = (u) => {
+  const [listaMedicos, setListaMedicos] = useState([]);
+
+
+  // Salvar consultas para o usuário logado
+  const salvarConsultas = async (cpfLogado, lista) => {
+    try {
+      await AsyncStorage.setItem(`consultas_${cpfLogado}`, JSON.stringify(lista));
+    } catch (error) {
+      console.log("Erro ao salvar consultas:", error);
+    }
+  };
+
+  // Carregar consultas do usuário logado
+  const carregarConsultas = async (cpfLogado) => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(`consultas_${cpfLogado}`);
+      const lista = jsonValue != null ? JSON.parse(jsonValue) : [];
+      setConsultas(lista);
+      return lista; 
+    } catch (error) {
+      console.log("Erro ao carregar consultas:", error);
+      return [];
+    }
+  };
+
+  
+  const handleLoginSuccessUsuario = async (u) => {
     setUser(u);
     setMedico(null);
     setCpfLogado(u.cpf);
     setScreen("homeUsuario");
+    await carregarConsultas(u.cpf);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
   };
 
@@ -102,7 +133,6 @@ export default function App() {
             setUser(null);
             setScreen("homeDoutor");
             setScreen("homeDoutor");
-            console.log("Login médico OK", med);
             Alert.alert("Bem-vindo!", "Login médico realizado.");
           }}
         />
@@ -121,6 +151,9 @@ export default function App() {
         <CadastroMedico
           onAfterSave={() => setScreen("loginMedico")}
           onCancelar={() => setScreen("loginMedico")}
+          onMedicoCadastrado={(novoMedico) =>{
+            setListaMedicos(prev => [...prev, novoMedico]);
+          }}
         />
       )}
 
@@ -130,6 +163,7 @@ export default function App() {
           user={user}
           onLogout={() => {
             setUser(null);
+            setConsultas([]); // Limpar cache local!
             setScreen("login");
           }}
           onGoBuscarExames={() => setScreen("buscarExames")}
@@ -145,11 +179,13 @@ export default function App() {
         />
       )}
 
+      {/* Home Médico */}
       {screen === "homeDoutor" && (
         <HomeDoutor
           medico={medico}
           onLogout={() => {
             setMedico(null);
+            setConsultas([]); // Limpar cache local!
             setScreen("login");
           }}
           onVerPerfil={() => setScreen("perfilMedico")} 
@@ -157,9 +193,11 @@ export default function App() {
           onGoChat={() => setScreen("listaPacientes")}
           onGoReceitas={() => setScreen("buscarReceitas")}
           onGoAtestado={() => setScreen("buscarAtestado")}
+          onGoAgenda = {() => setScreen("agendaMedico")}
         />
       )}
 
+      {/* Buscar Exames */}
       {screen === "buscarExames" && (
         <BuscarExamesCPF
           onVoltar={() =>
@@ -177,6 +215,7 @@ export default function App() {
         />
       )}
 
+      {/* Visualizar Exames */}
       {screen === "visualizarExame" && (
         <VisualizarExame
           exame={examPaciente}
@@ -184,6 +223,7 @@ export default function App() {
         />
       )}
 
+      {/* Solicitar Exames */}
       {screen === "solicitarExame" && (
         <SolicitarExame
           initialCpf={examCpf}
@@ -193,6 +233,7 @@ export default function App() {
         />
       )}
 
+      {/* Cadastrar Convênios */}
       {screen === "cadastrarConvenio" && (
         <CadastrarConvenio
           onVoltar={() => setScreen("homeUsuario")}
@@ -201,6 +242,7 @@ export default function App() {
         />
       )}
 
+      {/* Atualizar Convênios */}
       {screen === "atualizarConvenio" && (
         <AtualizarConvenio
           onVoltar={() => setScreen("cadastrarConvenio")}
@@ -208,6 +250,7 @@ export default function App() {
         />
       )}
 
+      {/* Menu pequeno após Paciente clicar em Agendamentos */}
       {screen === "inserirConsulta" && (
         <InserirConsulta
           onVoltar={() => setScreen("homeUsuario")}
@@ -215,31 +258,58 @@ export default function App() {
         />
       )}
 
+      {/* Agendar Consultas */}
       {screen === "agendarConsulta" && (
         <AgendarConsulta
+          listaMedicos={listaMedicos}
           onVoltar={() => setScreen("inserirConsulta")}
-          onContinuar={(medicoSelecionado) => {
-            setMedicoFiltrar(medicoSelecionado);
-            setScreen("escolherHorario");
-          }}
+          onContinuar={(dadosConsulta) => {
+            setConsultaAgendada(dadosConsulta);
+            setScreen("escolherHorario");       
+          }}        
         />
       )}
 
+      {/* Cancelar Consultas */}
       {screen === "cancelarConsulta" && (
-        <CancelarConsulta onVoltar={() => setScreen("inserirConsulta")} />
+        <CancelarConsulta
+          consultas={consultas}
+          setConsultas={(novaLista) =>{
+            setConsultas(novaLista);
+            salvarConsultas(cpfLogado, novaLista);
+          }}
+          onVoltar={() => setScreen("inserirConsulta")} 
+        />
       )}
 
+      {/* Visualizar Consultas */}
       {screen === "visualizarConsulta" && (
-        <VisualizarConsulta onVoltar={() => setScreen("inserirConsulta")} />
+        <VisualizarConsulta
+        consultas={consultas}
+        cpfLogado={cpfLogado}
+        onVoltar={() => setScreen("inserirConsulta")} 
+        />
       )}
 
+      {/* Calendário para finalizar Agendamento de Consultas */}
       {screen === "escolherHorario" && (
         <EscolherHorario
+          cpfLogado={cpfLogado}
+          consulta={consultaAgendada}
+          consultas={consultas}
+          listaMedicos={listaMedicos}
+          onVoltarParaInserirConsulta={() => setScreen("inserirConsulta")}
+          onConsultaConfirmada={async (novaConsulta) => {
+            const novasConsultas = [...consultas, novaConsulta];
+            setConsultas(novasConsultas);
+            await salvarConsultas(cpfLogado, novasConsultas);
+            setScreen("inserirConsulta");
+          }}
           onVoltar={() => setScreen("agendarConsulta")}
-          medicoFiltrar={medicoFiltrar}
         />
       )}
 
+      {/* Visualização de Exames do Paciente */}
       {screen === "pacienteExames" && (
         <PacienteExames
           cpf={user?.cpf}
@@ -247,6 +317,7 @@ export default function App() {
         />
       )}
 
+      {/* Bate-papo */}
       {screen === "chatMedico" && (
         <ChatMedico
           medicoId={chatParams?.medicoId ?? medico?.crm}
@@ -261,6 +332,7 @@ export default function App() {
         />
       )}
 
+      {/* Listar Pacientes */}
       {screen === "listaPacientes" && (
         <ListaPacientes
           onVoltar={() => setScreen("homeDoutor")}
@@ -275,6 +347,7 @@ export default function App() {
         />
       )}
 
+      {/* Buscar Receitas */}
       {screen === "buscarReceitas" && (
         <BuscarReceitasCPF
           onVoltar={() => setScreen("homeDoutor")}
@@ -290,6 +363,7 @@ export default function App() {
         />
       )}
 
+      {/* Criar Receitas */}
       {screen === "criarReceitas" && (
         <CriarReceitas
           initialCpf={receitaCpf}
@@ -299,6 +373,7 @@ export default function App() {
         />
       )}
 
+      {/* Listar Receitas */}
       {screen === "pacienteReceitas" && (
         <PacienteReceitas
           cpf={user?.cpf}
@@ -310,6 +385,7 @@ export default function App() {
         />
       )}
 
+      {/* Visualizar Receitas */}
       {screen === "visualizarReceita" && (
         <VisualizarReceita
           receita={receitaSelecionada}
@@ -320,6 +396,7 @@ export default function App() {
         />
       )}
 
+      {/* Buscar Atestados */}
       {screen === "buscarAtestado" && (
         <BuscarAtestadoCPF
           onVoltar={() => setScreen("homeDoutor")}
@@ -335,6 +412,7 @@ export default function App() {
         />
       )}
 
+      {/* Criar Atestados */}
       {screen === "criarAtestado" && (
         <CriarAtestado
           initialCpf={atestadoCpf}
@@ -344,6 +422,7 @@ export default function App() {
         />
       )}
 
+      {/* Listar Atestados */}
       {screen === "pacienteAtestados" && (
         <PacienteAtestado
           cpf={user?.cpf}
@@ -355,6 +434,7 @@ export default function App() {
         />
       )}
 
+      {/* Visualizar Atestados */}
       {screen === "visualizarAtestado" && (
         <VisualizarAtestado
           atestado={atestadoSelecionado}
@@ -384,6 +464,7 @@ export default function App() {
         />
       )}
 
+      {/* Perfil Médico */}
       {screen === "perfilMedico" && (
         <PerfilMedico
           medico={medico}
@@ -392,6 +473,7 @@ export default function App() {
         />
       )}
 
+      {/* Edição Perfil Médico */}
       {screen === "editarPerfilMedico" && (
         <EditarPerfilMedico
           medico={medico}
@@ -399,7 +481,13 @@ export default function App() {
        />
       )}
 
-
+      {/* Agenda do Médico */}
+      {screen === "agendaMedico" && (
+        <AgendaMedico
+          medicoNome={medico?.nome}
+          onVoltar={() => setScreen("homeDoutor")}
+       />
+      )}
       <StatusBar style="light" />
     </View>
   );
