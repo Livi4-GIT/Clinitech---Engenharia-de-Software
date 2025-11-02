@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Text, Pressable, Alert } from "react-native";
+import { StatusBar, StyleSheet, View, Text, Pressable, Alert } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import LoginUsuario from "./components/LoginUsuario";
 import CadastroUsuario from "./components/CadastroUsuario";
@@ -41,6 +41,7 @@ import EditarPerfilPaciente from "./components/EditarPerfilPaciente";
 import PerfilMedico from "./components/PerfilMedico";
 import EditarPerfilMedico from "./components/EditarPerfilMedico";
 
+  
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
@@ -63,11 +64,35 @@ export default function App() {
   const [medicoFiltrar, setMedicoFiltrar] = useState(null);
   const [chatParams, setChatParams] = useState(null);
 
-  const handleLoginSuccessUsuario = (u) => {
+  // Salvar consultas para o usuário logado
+  const salvarConsultas = async (cpfLogado, lista) => {
+    try {
+      await AsyncStorage.setItem(`consultas_${cpfLogado}`, JSON.stringify(lista));
+    } catch (error) {
+      console.log("Erro ao salvar consultas:", error);
+    }
+  };
+
+  // Carregar consultas do usuário logado
+  const carregarConsultas = async (cpfLogado) => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(`consultas_${cpfLogado}`);
+      const lista = jsonValue != null ? JSON.parse(jsonValue) : [];
+      setConsultas(lista);
+      return lista; 
+    } catch (error) {
+      console.log("Erro ao carregar consultas:", error);
+      return [];
+    }
+  };
+
+
+  const handleLoginSuccessUsuario = async (u) => {
     setUser(u);
     setMedico(null);
     setCpfLogado(u.cpf);
     setScreen("homeUsuario");
+    await carregarConsultas(u.cpf);
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
   };
 
@@ -132,6 +157,7 @@ export default function App() {
           user={user}
           onLogout={() => {
             setUser(null);
+            setConsultas([]); // Limpar cache local!
             setScreen("login");
           }}
           onGoBuscarExames={() => setScreen("buscarExames")}
@@ -152,6 +178,7 @@ export default function App() {
           medico={medico}
           onLogout={() => {
             setMedico(null);
+            setConsultas([]); // Limpar cache local!
             setScreen("login");
           }}
           onVerPerfil={() => setScreen("perfilMedico")} 
@@ -230,7 +257,10 @@ export default function App() {
       {screen === "cancelarConsulta" && (
         <CancelarConsulta
           consultas={consultas}
-          setConsultas={setConsultas}
+          setConsultas={(novaLista) =>{
+            setConsultas(novaLista);
+            salvarConsultas(cpfLogado, novaLista);
+          }}
           onVoltar={() => setScreen("inserirConsulta")} 
         />
       )}
@@ -238,19 +268,24 @@ export default function App() {
       {screen === "visualizarConsulta" && (
         <VisualizarConsulta
         consultas={consultas}
+        cpfLogado={cpfLogado}
         onVoltar={() => setScreen("inserirConsulta")} 
         />
       )}
 
       {screen === "escolherHorario" && (
         <EscolherHorario
-          onVoltar={() => setScreen("agendarConsulta")}
+          cpfLogado={cpfLogado}
           consulta={consultaAgendada}
+          consultas={consultas}
           onVoltarParaInserirConsulta={() => setScreen("inserirConsulta")}
-          onConsultaConfirmada={(novaConsulta) => {
-            setConsultas(prev => [...consultas, novaConsulta]);
-            setScreen("visualizarConsulta");
+          onConsultaConfirmada={async (novaConsulta) => {
+            const novasConsultas = [...consultas, novaConsulta];
+            setConsultas(novasConsultas);
+            await salvarConsultas(cpfLogado, novasConsultas);
+            setScreen("inserirConsulta");
           }}
+          onVoltar={() => setScreen("agendarConsulta")}
         />
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView, Modal, Pressable, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView, Modal, Pressable, Alert, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -16,7 +16,6 @@ export default function CancelarConsulta({ consultas = [], setConsultas, onVolta
     if (consultaSelecionada) {
       const novaLista = consultas.filter(c => c !== consultaSelecionada);
       setConsultas(novaLista);
-
       Alert.alert("Consulta cancelada", "Sua consulta foi cancelada com sucesso.");
     }
     setModalVisible(false);
@@ -33,7 +32,6 @@ export default function CancelarConsulta({ consultas = [], setConsultas, onVolta
       <SafeAreaView style={{ flex: 1 }}>
         <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
 
-        {/* Header */}
         <View style={styles.headerBar}>
           <TouchableOpacity onPress={onVoltar} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="#eaf1ff" />
@@ -42,7 +40,8 @@ export default function CancelarConsulta({ consultas = [], setConsultas, onVolta
           <View style={{ width: 34 }} />
         </View>
 
-        <View style={styles.content}>
+        {/* Scrollable content */}
+        <ScrollView contentContainerStyle={styles.content}>
           {consultas.length === 0 ? (
             <Text style={styles.text}>Nenhuma consulta agendada.</Text>
           ) : (
@@ -53,16 +52,14 @@ export default function CancelarConsulta({ consultas = [], setConsultas, onVolta
                 <Text style={styles.consultaTxt}><Text style={styles.label}>Localidade:</Text> {c.localidade}</Text>
                 <Text style={styles.consultaTxt}><Text style={styles.label}>Data:</Text> {c.dia}/{c.mes}/{c.ano} às {c.horario}</Text>
 
-                {/* Ícone de lixeira */}
                 <TouchableOpacity style={styles.trashBtn} onPress={() => abrirModal(c)}>
                   <Ionicons name="trash" size={22} color="#ff4d4d" />
                 </TouchableOpacity>
               </View>
             ))
           )}
-        </View>
+        </ScrollView>
 
-        {/* Modal de confirmação */}
         <Modal
           transparent={true}
           visible={modalVisible}
@@ -93,7 +90,7 @@ const styles = StyleSheet.create({
   backBtn: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.12)", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)" },
   headerTitle: { color: "#eaf1ff", fontSize: 16, fontWeight: "700" },
 
-  content: { flex: 1, padding: 20, gap: 16 },
+  content: { padding: 20, gap: 16 },
   text: { color: "#fff", fontSize: 16 },
 
   consultaCard: { backgroundColor: "rgba(255,255,255,0.1)", padding: 14, borderRadius: 10, marginBottom: 12, position: "relative" },

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,64 +6,88 @@ import { Ionicons } from "@expo/vector-icons";
 // Horários fixos
 const HORARIOS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
 
-export default function EscolherHorario({ onVoltar, consulta, onVoltarParaInserirConsulta, onConsultaConfirmada }) {
+export default function EscolherHorario({
+  cpfLogado,
+  onVoltar,
+  consulta,
+  consultas = [],
+  onVoltarParaInserirConsulta,
+  onConsultaConfirmada
+}) {
   const objConsulta = consulta || {};
   const { especialidade, localidade, medicoFiltrar, listaMedicos } = objConsulta;
 
   const [diaSelecionado, setDiaSelecionado] = useState(null);
   const [horarioSelecionado, setHorarioSelecionado] = useState(null);
-
   const hoje = new Date();
   const [mesAtual, setMesAtual] = useState(hoje.getMonth());
   const [anoAtual, setAnoAtual] = useState(hoje.getFullYear());
 
+  // Gera dias do mês
   const gerarDiasDoMes = (mes, ano) => {
     const numDias = new Date(ano, mes + 1, 0).getDate();
     return Array.from({ length: numDias }, (_, i) => i + 1);
   };
   const diasDoMes = gerarDiasDoMes(mesAtual, anoAtual);
 
+  // Filtra horários disponíveis dinamicamente
+  const horariosDisponiveis = useMemo(() => {
+    if (!diaSelecionado) return [];
+    return HORARIOS.filter(h => {
+      return !consultas.some(c =>
+        c.especialidade === especialidade &&
+        c.localidade === localidade &&
+        c.dia === diaSelecionado &&
+        c.mes === mesAtual + 1 &&
+        c.ano === anoAtual &&
+        (medicoFiltrar && medicoFiltrar !== "Todos" ? c.medico === medicoFiltrar : true) &&
+        c.horario === h
+      );
+    });
+  }, [diaSelecionado, mesAtual, anoAtual, especialidade, localidade, medicoFiltrar, consultas]);
+
   const confirmarConsulta = () => {
-  if (!diaSelecionado || !horarioSelecionado) return;
+    if (!diaSelecionado || !horarioSelecionado) return;
 
-  const medicoEscolhido =
-    medicoFiltrar && medicoFiltrar !== "Todos"
-      ? medicoFiltrar
-      : (listaMedicos || []).filter(m => m !== "Todos")[Math.floor(Math.random() * ((listaMedicos || []).length - 1))];
+    const medicoEscolhido =
+      medicoFiltrar && medicoFiltrar !== "Todos"
+        ? medicoFiltrar
+        : (listaMedicos || []).filter(m => m !== "Todos")[Math.floor(Math.random() * ((listaMedicos || []).length - 1))];
 
-  const novaConsulta = {
-    especialidade,
-    localidade,
-    medico: medicoEscolhido,
-    dia: diaSelecionado,
-    mes: mesAtual + 1,
-    ano: anoAtual,
-    horario: horarioSelecionado,
-  };
+    const novaConsulta = {
+      id: Date.now(),
+      especialidade,
+      localidade,
+      medico: medicoEscolhido,
+      dia: diaSelecionado,
+      mes: mesAtual + 1,
+      ano: anoAtual,
+      horario: horarioSelecionado,
+      cpfPaciente: cpfLogado,
+    };
 
-  const mensagem = `Sua consulta em ${especialidade} foi agendada com sucesso para ${diaSelecionado}/${mesAtual + 1}/${anoAtual} às ${horarioSelecionado}, com ${medicoEscolhido}.
+    const minhasConsultas = consultas.filter(c => c.cpfPaciente === cpfLogado);
+    const novasConsultas = [...minhasConsultas, novaConsulta];
+
+    const mensagem = `Sua consulta em ${especialidade} foi agendada com sucesso para ${diaSelecionado}/${mesAtual + 1}/${anoAtual} às ${horarioSelecionado}, com ${medicoEscolhido}.
 Comparecer com 15 minutos de antecedência no ${localidade}.`;
 
-  // Ambiente Web
-  if (typeof window !== "undefined") {
-    window.alert(mensagem);
-    onConsultaConfirmada?.(novaConsulta); // <-- Salva a consulta
-    onVoltarParaInserirConsulta?.(); // volta ao menu principal ou para outra tela
-  } else {
-    // Ambiente mobile
-    Alert.alert("Consulta agendada!", mensagem, [
-      {
-        text: "OK",
-        onPress: () => {
-          onConsultaConfirmada?.(novaConsulta);
-          onVoltarParaInserirConsulta?.();
-        },
-      },
-    ]);
-  }
-};
+    const finalizar = () => {
+      onConsultaConfirmada?.(novaConsulta);
+      onVoltarParaInserirConsulta?.();
+    };
 
-
+    if (typeof window !== "undefined") {
+      window.alert(mensagem);
+      setTimeout(finalizar, 50);
+    } else {
+      Alert.alert("Consulta agendada!", mensagem, [
+        {
+          text: "OK",
+          onPress: finalizar }
+      ]);
+    }
+  };
 
   const irMesAnterior = () => {
     if (mesAtual === 0) {
@@ -101,14 +125,12 @@ Comparecer com 15 minutos de antecedência no ${localidade}.`;
         </View>
 
         <ScrollView contentContainerStyle={styles.container}>
-          {/* Cabeçalho do mês */}
           <View style={styles.mesNav}>
             <TouchableOpacity onPress={irMesAnterior}><Text style={styles.mesNavTxt}>{"<"}</Text></TouchableOpacity>
             <Text style={styles.mesAtualTxt}>{meses[mesAtual]} {anoAtual}</Text>
             <TouchableOpacity onPress={irMesSeguinte}><Text style={styles.mesNavTxt}>{">"}</Text></TouchableOpacity>
           </View>
 
-          {/* Dias */}
           <View style={styles.diasContainer}>
             {diasDoMes.map(dia => (
               <TouchableOpacity
@@ -124,20 +146,25 @@ Comparecer com 15 minutos de antecedência no ${localidade}.`;
             ))}
           </View>
 
-          {/* Horários */}
           {diaSelecionado && (
             <>
               <Text style={styles.sectionTitle}>Horários disponíveis</Text>
               <View style={styles.horariosContainer}>
-                {HORARIOS.map(h => (
-                  <TouchableOpacity
-                    key={h}
-                    style={[styles.horarioBtn, horarioSelecionado === h && styles.horarioBtnSelecionado]}
-                    onPress={() => setHorarioSelecionado(h)}
-                  >
-                    <Text style={[styles.horarioText, horarioSelecionado === h && styles.horarioTextSelecionado]}>{h}</Text>
-                  </TouchableOpacity>
-                ))}
+                {horariosDisponiveis.length === 0 ? (
+                  <Text style={{ color: "#fff", fontWeight: "700", marginTop: 10 }}>
+                    Nenhum horário disponível neste dia.
+                  </Text>
+                ) : (
+                  horariosDisponiveis.map(h => (
+                    <TouchableOpacity
+                      key={h}
+                      style={[styles.horarioBtn, horarioSelecionado === h && styles.horarioBtnSelecionado]}
+                      onPress={() => setHorarioSelecionado(h)}
+                    >
+                      <Text style={[styles.horarioText, horarioSelecionado === h && styles.horarioTextSelecionado]}>{h}</Text>
+                    </TouchableOpacity>
+                  ))
+                )}
               </View>
             </>
           )}
@@ -152,6 +179,7 @@ Comparecer com 15 minutos de antecedência no ${localidade}.`;
     </LinearGradient>
   );
 }
+
 
 const styles = StyleSheet.create({
   headerBar: { paddingHorizontal: 16, paddingVertical: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },

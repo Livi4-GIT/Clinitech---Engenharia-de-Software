@@ -3,7 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function VisualizarConsulta({ consultas = [], onVoltar }) {
+export default function VisualizarConsulta({ consultas = [], cpfLogado, onVoltar }) {
+  // Filtra apenas as consultas do paciente logado
+  const minhasConsultas = consultas.filter(c => c.cpfPaciente === cpfLogado);
+
   return (
     <LinearGradient colors={["#0a1a3f", "#0f2f6d", "#1c4fb8"]} style={{ flex: 1 }}>
       <View style={styles.headerBar}>
@@ -15,10 +18,10 @@ export default function VisualizarConsulta({ consultas = [], onVoltar }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        {consultas.length === 0 ? (
+        {minhasConsultas.length === 0 ? (
           <Text style={styles.emptyTxt}>Nenhuma consulta agendada.</Text>
         ) : (
-          consultas.map((c, idx) => (
+          minhasConsultas.map((c, idx) => (
             <View key={idx} style={styles.consultaCard}>
               <Text style={styles.consultaTxt}><Text style={styles.label}>Especialidade:</Text> {c.especialidade}</Text>
               <Text style={styles.consultaTxt}><Text style={styles.label}>Doutor(a):</Text> {c.medico}</Text>
@@ -31,6 +34,7 @@ export default function VisualizarConsulta({ consultas = [], onVoltar }) {
     </LinearGradient>
   );
 }
+
 
 const styles = StyleSheet.create({
   headerBar: { paddingHorizontal: 16, paddingVertical: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
