@@ -228,7 +228,11 @@ export default function App() {
       )}
 
       {screen === "cancelarConsulta" && (
-        <CancelarConsulta onVoltar={() => setScreen("inserirConsulta")} />
+        <CancelarConsulta
+          consultas={consultas}
+          setConsultas={setConsultas}
+          onVoltar={() => setScreen("inserirConsulta")} 
+        />
       )}
 
       {screen === "visualizarConsulta" && (
