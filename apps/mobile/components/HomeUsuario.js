@@ -1,11 +1,17 @@
 import React from 'react';
 import {
-  View, Text, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function HomeScreen({
+export default function HomeUsuario({
   navigation,
   user,
   onLogout,
@@ -14,7 +20,8 @@ export default function HomeScreen({
   onGoPacienteExames,
   onGoChat,
   onGoReceitas,
-  onGoAtestados, 
+  onGoAtestados,
+  onVerPerfil, // <-- botão do perfil
 }) {
   const nome = (user?.nome || 'Fulano').trim();
 
@@ -28,7 +35,11 @@ export default function HomeScreen({
   const isFeminino = generoRaw.startsWith('fem') || generoRaw.includes('mulher');
   const isMasculino = generoRaw.startsWith('masc') || generoRaw.includes('homem');
 
-  const saudacao = isFeminino ? 'Seja Bem-Vinda' : isMasculino ? 'Seja Bem-Vindo' : 'Seja Bem-Vindo(a)';
+  const saudacao = isFeminino
+    ? 'Seja Bem-Vinda'
+    : isMasculino
+    ? 'Seja Bem-Vindo'
+    : 'Seja Bem-Vindo(a)';
 
   const abrirCadastrarConvenio = () => {
     if (navigation?.navigate) navigation.navigate('CadastrarConvenio');
@@ -64,13 +75,15 @@ export default function HomeScreen({
       <SafeAreaView style={styles.container}>
         <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
 
+        {/* Cabeçalho com botão do perfil */}
         <View style={styles.header}>
           <Text style={styles.headerText}>{saudacao}, {nome}</Text>
-          <View style={styles.profileCircle}>
+          <Pressable style={styles.profileCircle} onPress={onVerPerfil}>
             <Ionicons name="person-outline" size={32} color="#3E1B83" />
-          </View>
+          </Pressable>
         </View>
 
+        {/* Grade de opções */}
         <View style={styles.grid}>
           <View style={styles.row}>
             <TouchableOpacity style={styles.iconBox} onPress={abrirInserirConsultas}>
@@ -85,7 +98,7 @@ export default function HomeScreen({
           </View>
 
           <View style={styles.row}>
-            <TouchableOpacity style={styles.iconBox} onPress={() => { if (typeof onGoChat === 'function') onGoChat(); }}>
+            <TouchableOpacity style={styles.iconBox} onPress={onGoChat}>
               <Ionicons name="chatbubble-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Comunicação</Text>
             </TouchableOpacity>
@@ -109,6 +122,7 @@ export default function HomeScreen({
           </View>
         </View>
 
+        {/* Botão de logout */}
         {!!onLogout && (
           <TouchableOpacity
             onPress={onLogout}
@@ -149,7 +163,6 @@ export default function HomeScreen({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-
   header: {
     paddingVertical: 16,
     paddingHorizontal: 20,
@@ -157,9 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
   headerText: { color: '#eaf1ff', fontSize: 20, fontWeight: '700' },
-
   profileCircle: {
     width: 48,
     height: 48,
@@ -170,16 +181,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   grid: { marginTop: 24, alignItems: 'center', paddingHorizontal: 16 },
-
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 16,
   },
-
   iconBox: {
     width: '48%',
     height: 130,
@@ -195,7 +203,6 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 10 },
   },
-
   label: {
     marginTop: 10,
     fontSize: 14,

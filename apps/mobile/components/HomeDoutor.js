@@ -1,21 +1,26 @@
 import React from 'react';
 import {
-  View, Text, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function HomeDoutor({
-  navigation,
   medico,
   onLogout,
   onGoBuscarExames,
   onGoChat,
   onGoReceitas,
-  onGoAtestado, 
+  onGoAtestado,
+  onVerPerfil, // <- adicionamos aqui
 }) {
-  const nome = (medico?.nome || 'Ciclano').trim();
-
+  const nome = (medico?.nome || 'Dr. Ciclano').trim();
   const generoRaw = (medico?.genero ?? '')
     .toString()
     .normalize('NFD')
@@ -34,18 +39,14 @@ export default function HomeDoutor({
 
   const abrirBuscarExames = () => {
     if (typeof onGoBuscarExames === 'function') onGoBuscarExames();
-    else if (navigation?.navigate) navigation.navigate('BuscarExamesCPF');
   };
 
   const abrirReceitas = () => {
     if (typeof onGoReceitas === 'function') onGoReceitas();
-    else if (navigation?.navigate) navigation.navigate('BuscarReceitasCPF');
   };
 
-  // <— NOVO
   const abrirAtestado = () => {
     if (typeof onGoAtestado === 'function') onGoAtestado();
-    else if (navigation?.navigate) navigation.navigate('Atestado');
   };
 
   return (
@@ -58,13 +59,15 @@ export default function HomeDoutor({
       <SafeAreaView style={styles.container}>
         <StatusBar backgroundColor="#0a1a3f" barStyle="light-content" />
 
+        {/* Cabeçalho com nome e botão de perfil */}
         <View style={styles.header}>
           <Text style={styles.headerText}>{saudacao}, {nome}</Text>
-          <View style={styles.profileCircle}>
+          <Pressable style={styles.profileCircle} onPress={onVerPerfil}>
             <Ionicons name="person-outline" size={32} color="#3E1B83" />
-          </View>
+          </Pressable>
         </View>
 
+        {/* Grade de botões */}
         <View style={styles.grid}>
           <View style={styles.row}>
             <TouchableOpacity style={styles.iconBox}>
@@ -72,56 +75,34 @@ export default function HomeDoutor({
               <Text style={styles.label}>Agendamentos</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.iconBox}
-              onPress={abrirReceitas}
-              accessibilityRole="button"
-              accessibilityLabel="Ir para receitas (buscar por CPF)"
-            >
+            <TouchableOpacity style={styles.iconBox} onPress={abrirReceitas}>
               <MaterialCommunityIcons name="receipt-text-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Receitas</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.row}>
-            <TouchableOpacity
-              style={styles.iconBox}
-              onPress={onGoChat}
-              accessibilityRole="button"
-              accessibilityLabel="Ir para chat com médico"
-            >
+            <TouchableOpacity style={styles.iconBox} onPress={onGoChat}>
               <Ionicons name="chatbubble-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Comunicação</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.iconBox}
-              onPress={abrirBuscarExames}
-              accessibilityRole="button"
-              accessibilityLabel="Ir para busca de exames por CPF"
-            >
+            <TouchableOpacity style={styles.iconBox} onPress={abrirBuscarExames}>
               <MaterialCommunityIcons name="microscope" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Exames</Text>
             </TouchableOpacity>
           </View>
 
-          {/* NOVO: linha com o botão Atestado */}
           <View style={styles.row}>
-            <TouchableOpacity
-              style={styles.iconBox}
-              onPress={abrirAtestado}
-              accessibilityRole="button"
-              accessibilityLabel="Ir para emissão de atestado"
-            >
+            <TouchableOpacity style={styles.iconBox} onPress={abrirAtestado}>
               <MaterialCommunityIcons name="file-document-outline" size={42} color="#eaf1ff" />
               <Text style={styles.label}>Atestado</Text>
             </TouchableOpacity>
-
-            {/* Espaçador para manter a grade 2x2/2x1 visualmente consistente */}
             <View style={{ width: '48%' }} />
           </View>
         </View>
 
+        {/* Botão de logout */}
         {!!onLogout && (
           <TouchableOpacity
             onPress={onLogout}

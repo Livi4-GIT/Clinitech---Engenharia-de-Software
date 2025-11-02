@@ -35,11 +35,17 @@ import BuscarAtestadoCPF from "./components/BuscarAtestadoCPF";
 import VisualizarAtestado from "./components/VisualizarAtestado";
 import PacienteAtestado from "./components/PacienteAtestado";
 import CriarAtestado from "./components/CriarAtestado";
+import PerfilPaciente from "./components/PerfilPaciente";
+import EditarPerfilPaciente from "./components/EditarPerfilPaciente";
+
+import PerfilMedico from "./components/PerfilMedico";
+import EditarPerfilMedico from "./components/EditarPerfilMedico";
 
 export default function App() {
   const [screen, setScreen] = useState("login");
   const [user, setUser] = useState(null);
   const [medico, setMedico] = useState(null);
+  const [cpfLogado, setCpfLogado] = useState(null);
 
   const [examCpf, setExamCpf] = useState(null);
   const [examPaciente, setExamPaciente] = useState(null);
@@ -58,12 +64,14 @@ export default function App() {
   const handleLoginSuccessUsuario = (u) => {
     setUser(u);
     setMedico(null);
+    setCpfLogado(u.cpf);
     setScreen("homeUsuario");
     Alert.alert("Bem-vindo!", `Login realizado, ${u?.nome || "usuário"}.`);
   };
 
   return (
     <View style={styles.container}>
+      {/* Login Usuário */}
       {screen === "login" && (
         <LoginUsuario
           onGoCadastro={() => setScreen("cadastro")}
@@ -72,6 +80,7 @@ export default function App() {
         />
       )}
 
+      {/* Cadastro Usuário */}
       {screen === "cadastro" && (
         <>
           <CadastroUsuario onAfterSave={() => setScreen("login")} />
@@ -83,6 +92,7 @@ export default function App() {
         </>
       )}
 
+      {/* Login Médico */}
       {screen === "loginMedico" && (
         <LoginMedico
           onGoLoginUsuario={() => setScreen("login")}
@@ -91,11 +101,14 @@ export default function App() {
             setMedico(med);
             setUser(null);
             setScreen("homeDoutor");
+            setScreen("homeDoutor");
+            console.log("Login médico OK", med);
             Alert.alert("Bem-vindo!", "Login médico realizado.");
           }}
         />
       )}
 
+      {/* Confirmação Cadastro Médico */}
       {screen === "confirmacaoCadastroMedico" && (
         <ConfirmacaoCadastroMedico
           onVoltar={() => setScreen("loginMedico")}
@@ -103,6 +116,7 @@ export default function App() {
         />
       )}
 
+      {/* Cadastro Médico */}
       {screen === "cadastroMedico" && (
         <CadastroMedico
           onAfterSave={() => setScreen("loginMedico")}
@@ -110,6 +124,7 @@ export default function App() {
         />
       )}
 
+      {/* Home Usuário */}
       {screen === "homeUsuario" && (
         <HomeUsuario
           user={user}
@@ -137,6 +152,7 @@ export default function App() {
             setMedico(null);
             setScreen("login");
           }}
+          onVerPerfil={() => setScreen("perfilMedico")} 
           onGoBuscarExames={() => setScreen("buscarExames")}
           onGoChat={() => setScreen("listaPacientes")}
           onGoReceitas={() => setScreen("buscarReceitas")}
@@ -346,8 +362,43 @@ export default function App() {
             if (medico) setScreen("buscarAtestado");
             else setScreen("pacienteAtestados");
           }}
+          onLogout={() => setScreen("login")}
+          onVerPerfil={() => setScreen("perfilPaciente")}
         />
       )}
+
+      {/* Perfil Usuário */}
+      {screen === "perfilPaciente" && (
+        <PerfilPaciente
+          cpfLogado={cpfLogado}
+          onVoltar={() => setScreen("homeUsuario")}
+          onGoEditar={() => setScreen("editarPerfilPaciente")}
+        />
+      )}
+
+      {/* Edição Perfil Usuário */}
+      {screen === "editarPerfilPaciente" && (
+        <EditarPerfilPaciente
+          cpfLogado={cpfLogado}
+          onVoltar={() => setScreen("perfilPaciente")}
+        />
+      )}
+
+      {screen === "perfilMedico" && (
+        <PerfilMedico
+          medico={medico}
+          onGoEditar={() => setScreen("editarPerfilMedico")}
+          onVoltarHome={() => setScreen("homeDoutor")}
+        />
+      )}
+
+      {screen === "editarPerfilMedico" && (
+        <EditarPerfilMedico
+          medico={medico}
+          onVoltar={() => setScreen("perfilMedico")}
+       />
+      )}
+
 
       <StatusBar style="light" />
     </View>
