@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Horários fixos
 const HORARIOS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
@@ -46,7 +47,7 @@ export default function EscolherHorario({
     });
   }, [diaSelecionado, mesAtual, anoAtual, especialidade, localidade, medicoFiltrar, consultas]);
 
-  const confirmarConsulta = () => {
+  const confirmarConsulta = async () => {
     if (!diaSelecionado || !horarioSelecionado) return;
 
     const medicoEscolhido =
@@ -64,30 +65,26 @@ export default function EscolherHorario({
       ano: anoAtual,
       horario: horarioSelecionado,
       cpfPaciente: cpfLogado,
+      status: "agendada",
+      notificacoes: [],
     };
 
-    const minhasConsultas = consultas.filter(c => c.cpfPaciente === cpfLogado);
-    const novasConsultas = [...minhasConsultas, novaConsulta];
+    const mensagem = `Sua consulta em ${especialidade} foi agendada com sucesso para ${diaSelecionado}/${mesAtual + 1}/${anoAtual} às ${horarioSelecionado}, com ${medicoEscolhido}. Comparecer com 15 minutos de antecedência no ${localidade}.`;
 
-    const mensagem = `Sua consulta em ${especialidade} foi agendada com sucesso para ${diaSelecionado}/${mesAtual + 1}/${anoAtual} às ${horarioSelecionado}, com ${medicoEscolhido}.
-Comparecer com 15 minutos de antecedência no ${localidade}.`;
+    try {
+      const todasConsultas = JSON.parse(await AsyncStorage.getItem(`consultas_${cpfLogado}`)) || [];
+      todasConsultas.push(novaConsulta);
+      await AsyncStorage.setItem(`consultas_${cpfLogado}`, JSON.stringify(todasConsultas));
 
-    const finalizar = () => {
-      onConsultaConfirmada?.(novaConsulta);
-      onVoltarParaInserirConsulta?.();
-    };
-
-    if (typeof window !== "undefined") {
-      window.alert(mensagem);
-      setTimeout(finalizar, 50);
-    } else {
-      Alert.alert("Consulta agendada!", mensagem, [
-        {
-          text: "OK",
-          onPress: finalizar }
-      ]);
-    }
-  };
+      const mostrarAlerta = (titulo, msg, onOk) => { 
+        if (typeof window !== "undefined") { 
+          window.alert(`${titulo}\n\n${msg}`); onOk?.(); 
+        } else { 
+          Alert.alert(titulo, msg, [{ text: "OK", onPress: onOk }]); } }; mostrarAlerta("Consulta agendada!", mensagem, () => { onConsultaConfirmada?.(novaConsulta); onVoltarParaInserirConsulta?.(); });
+    } catch (error) {
+      console.error("Erro ao salvar consulta", error);
+      Alert.alert("Erro", "Não foi possível agendar a consulta");
+    }};
 
   const irMesAnterior = () => {
     if (mesAtual === 0) {

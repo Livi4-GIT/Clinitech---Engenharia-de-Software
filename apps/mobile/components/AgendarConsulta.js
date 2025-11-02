@@ -43,7 +43,14 @@ export default function AgendarConsulta({ onVoltar, onContinuar, listaMedicos })
 
  const openPicker = (type, currentValue) => {
   setPickerType(type);
-  const options = getOptions(); // mesma função que você já tem
+
+  let options;
+  if (type === "especialidade") options = ESPECIALIDADES;
+  else if (type === "procedimento") options = PROCEDIMENTOS;
+  else if (type === "localidade") options = LOCALIDADES;
+  else if (type === "medico") options = medicosFinal;
+  else options = [];
+
   let initialValue = currentValue;
 
   // Para médico: se não estiver no array, default para "Todos"
@@ -52,7 +59,6 @@ export default function AgendarConsulta({ onVoltar, onContinuar, listaMedicos })
   setTempValue(initialValue || options[0] || "");
   setPickerOpen(true);
 };
-
 
   const confirmPicker = () => {
     if (pickerType === "especialidade") setEspecialidade(tempValue);

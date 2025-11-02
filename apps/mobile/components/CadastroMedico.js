@@ -114,6 +114,13 @@ export default class CadastroMedico extends React.Component {
       };
 
       await AsyncStorage.setItem(chave, JSON.stringify(registro));
+      
+      const listaRaw = await AsyncStorage.getItem("MEDICOS_LISTA");
+      const lista = JSON.parse(listaRaw) || []; 
+      if (!lista.includes(crmN)) { 
+        lista.push(crmN); 
+        await AsyncStorage.setItem("MEDICOS_LISTA", JSON.stringify(lista)); }
+      
       Alert.alert("Sucesso", "Cadastro de médico salvo!");
 
       // Limpeza do formulário
@@ -129,8 +136,7 @@ export default class CadastroMedico extends React.Component {
       });
 
       // Atualiza a lista de médicos no App.js
-      this.props.onMedicoCadastrado?.(registro); // <-- adiciona o médico à lista dinâmica do App.js
-
+      this.props.onMedicoCadastrado?.(registro);
       this.props.onAfterSave?.();
     } catch (e) {
       Alert.alert("Erro", "Não foi possível salvar o cadastro.");

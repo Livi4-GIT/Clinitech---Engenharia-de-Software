@@ -40,6 +40,7 @@ import EditarPerfilPaciente from "./components/EditarPerfilPaciente";
 
 import PerfilMedico from "./components/PerfilMedico";
 import EditarPerfilMedico from "./components/EditarPerfilMedico";
+import AgendaMedico from "./components/AgendaMedico";
 
   
 export default function App() {
@@ -89,7 +90,7 @@ export default function App() {
     }
   };
 
-
+  
   const handleLoginSuccessUsuario = async (u) => {
     setUser(u);
     setMedico(null);
@@ -192,6 +193,7 @@ export default function App() {
           onGoChat={() => setScreen("listaPacientes")}
           onGoReceitas={() => setScreen("buscarReceitas")}
           onGoAtestado={() => setScreen("buscarAtestado")}
+          onGoAgenda = {() => setScreen("agendaMedico")}
         />
       )}
 
@@ -479,6 +481,13 @@ export default function App() {
        />
       )}
 
+      {/* Agenda do Médico */}
+      {screen === "agendaMedico" && (
+        <AgendaMedico
+          medicoNome={medico?.nome}
+          onVoltar={() => setScreen("homeDoutor")}
+       />
+      )}
       <StatusBar style="light" />
     </View>
   );
