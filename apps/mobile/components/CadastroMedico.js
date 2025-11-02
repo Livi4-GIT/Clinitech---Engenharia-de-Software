@@ -116,6 +116,7 @@ export default class CadastroMedico extends React.Component {
       await AsyncStorage.setItem(chave, JSON.stringify(registro));
       Alert.alert("Sucesso", "Cadastro de médico salvo!");
 
+      // Limpeza do formulário
       this.setState({
         nome: "",
         nascimento: "",
@@ -126,6 +127,9 @@ export default class CadastroMedico extends React.Component {
         senha: "",
         confirmarSenha: "",
       });
+
+      // Atualiza a lista de médicos no App.js
+      this.props.onMedicoCadastrado?.(registro); // <-- adiciona o médico à lista dinâmica do App.js
 
       this.props.onAfterSave?.();
     } catch (e) {
